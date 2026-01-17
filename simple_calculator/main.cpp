@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <limits>
 using namespace std;
@@ -15,18 +16,39 @@ int main() {
   float n1{};
   n1 = selecting_num();
 
-  cout << "What do you want do? [+, -, ÷, ×] ";
+  while (true) {
+    cout << "What do you want do? [+, -, ÷, ×] ";
 
-  string operators{"+-/*"};
-  char op;
-  op = selecting_operator(operators);
+    string operators{"+-/*"};
+    char op;
+    op = selecting_operator(operators);
 
-  cout << "Select second number: ";
+    cout << "Select second number: ";
 
-  float n2{};
-  n2 = selecting_num();
+    float n2{};
+    n2 = selecting_num();
 
-  calculating(n1, op, n2);
+    calculating(n1, op, n2);
+
+    cout << "Wanna continue? Y/N: ";
+    char con;`
+
+    while (true) {
+      cin >> con;
+      con = tolower(con);
+      if (con == 'y' || con == 'n') {
+        break;
+      } else {
+        cout << "Wrong key. Try again: ";
+        cleaner();
+      }
+    }
+
+    if (con == 'n') {
+      cout << "Bye." << '\n';
+      break;
+    }
+  }
 
   return 0;
 }
