@@ -31,16 +31,24 @@ int main() {
     calculating(n1, op, n2);
 
     cout << "Wanna continue? Y/N: ";
-    char con;`
+    string check_con;
+    char con;
 
     while (true) {
-      cin >> con;
-      con = tolower(con);
+      getline(cin, check_con);
+
+      if (check_con.size() == 1) {
+        con = check_con[0];
+        con = tolower(con);
+      } else {
+        cout << "You inserted too much letters. Try again: ";
+        continue;
+      }
+
       if (con == 'y' || con == 'n') {
         break;
       } else {
         cout << "Wrong key. Try again: ";
-        cleaner();
       }
     }
 
