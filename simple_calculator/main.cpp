@@ -37,6 +37,7 @@ int main() {
 
     while (true) {
       getline(cin, check_con);
+      
 
       if (check_con.size() == 1) {
         con = check_con[0];
