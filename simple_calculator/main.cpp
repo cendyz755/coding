@@ -7,7 +7,7 @@ using namespace std;
 void cleaner();
 float selecting_num();
 char selecting_operator(string &);
-void calculating(float &, char &, float &);
+float calculating(float &, char &, float &);
 
 int main() {
   cout << "Welcome to simple calculator!" << '\n';
@@ -28,8 +28,9 @@ int main() {
     float n2{};
     n2 = selecting_num();
 
-    calculating(n1, op, n2);
-
+    float result {calculating(n1, op, n2)};
+    
+  cout << "Your result: " << result << '\n';
     cout << "Wanna continue? Y/N: ";
     string check_con;
     char con;
@@ -46,6 +47,7 @@ int main() {
       }
 
       if (con == 'y' || con == 'n') {
+        n1 = calculating(n1, op, n2);
         break;
       } else {
         cout << "Wrong key. Try again: ";
@@ -76,10 +78,18 @@ float selecting_num() {
 }
 
 char selecting_operator(string &ops) {
+  string check;
   char s;
 
   while (true) {
-    cin >> s;
+    getline(cin, check);
+
+    if (check.size() != 1) {
+      cout << "Wrong key. Try again: ";
+      continue;
+    } else {
+      s = check[0];
+    }
 
     if (find(ops.begin(), ops.end(), s) == ops.end()) {
       cout << "This operator is not corret. Try again: ";
@@ -91,7 +101,7 @@ char selecting_operator(string &ops) {
   }
 }
 
-void calculating(float &n1, char &op, float &n2) {
+float calculating(float &n1, char &op, float &n2) {
   float result{};
 
   if (op == '-') {
@@ -104,7 +114,8 @@ void calculating(float &n1, char &op, float &n2) {
     result = n1 * n2;
   }
 
-  cout << "Your result: " << result << '\n';
+
+  return result;
 }
 
 void cleaner() {
