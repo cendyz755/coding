@@ -1,11 +1,11 @@
 #include <cstdio>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <math.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <iomanip>
 using namespace std;
 
 int selecting_type(vector<string>);
@@ -15,6 +15,8 @@ double select_value();
 double cel_to_fah();
 double fah_to_cel();
 void cleaner();
+
+// ############################### MAIN
 
 int main() {
   vector<string> types{"temperature", "length", "weight"};
@@ -36,27 +38,58 @@ int main() {
   if (what_units[selected_type].size() > 2) {
     to_unit = more_than_two_units(what_units[selected_type], from_unit);
     cout << '\n';
+  } else if (from_unit == 1) {
+    to_unit = 2;
+  } else {
+    to_unit = 1;
   }
 
   double user_value{};
   user_value = select_value();
 
-
   if (types[selected_type - 1] == "length") {
-      if (from_unit == 1 && to_unit == 2) {
-        user_value /= 2.54;
-      }
-  } 
+    if (from_unit == 1 && to_unit == 2) {
+      user_value /= 2.54;
+    } else if (from_unit == 2 && to_unit == 1) {
+      user_value *= 2.54;
+    } else if (from_unit == 1 && to_unit == 3) {
+      user_value /= 1000;
+    } else if (from_unit == 2 && to_unit == 3) {
+      user_value *= 2.54 / 1000;
+    } else if (from_unit == 3 && to_unit == 1) {
+      user_value *= 1000;
+    } else if (from_unit == 3 && to_unit == 2) {
+      user_value *= 1000 / 2.54;
+    }
+  } else if (types[selected_type - 1] == "temperature") {
+    if (from_unit == 2 && to_unit == 1) {
+      user_value = (user_value - 32) * 5 / 9;
+    } else if (from_unit == 1 && to_unit == 2) {
+      user_value = user_value * 9 / 5 + 32;
+    }
+  } else {
+    if (from_unit == 1 && to_unit == 2) {
+      user_value *= 2.20462;
+    } else {
+      user_value /= 2.20462;
+    }
+  }
 
-  cout << "This is your result: " << fixed << setprecision(3) << user_value << '\n';
+  cout << "Converting from " << what_units[selected_type][from_unit - 1]
+       << " to " << what_units[selected_type][to_unit - 1] << " is: " << fixed
+       << setprecision(2) << user_value << " " << '\n';
 
   return 0;
 }
+
+// ############################### CLEANER
 
 void cleaner() {
   cin.clear();
   cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
+
+// ############################### USER SELECTING TYPE
 
 int selecting_type(vector<string> type) {
   cout << "Welcome to units converter!" << '\n';
@@ -91,6 +124,8 @@ int selecting_type(vector<string> type) {
   return selected;
 }
 
+// ############################### USER SELECTING FROM UNIT
+
 int from_unit_func(unordered_map<int, vector<string>> units, int selected) {
   cout << "Select from what unit do you want to convert:" << '\n';
 
@@ -122,6 +157,8 @@ int from_unit_func(unordered_map<int, vector<string>> units, int selected) {
 
   return sel_unit;
 }
+
+// ############################### IF MORE THAN TWO UNITS
 
 int more_than_two_units(vector<string> types, int from) {
   int dest_unit{};
@@ -159,6 +196,8 @@ int more_than_two_units(vector<string> types, int from) {
 
   return dest_unit;
 }
+
+// ############################### USER SELECTING VALUE
 
 double select_value() {
   cout << "Enter the value you want to convert: ";
