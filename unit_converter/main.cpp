@@ -12,9 +12,7 @@ int selecting_type(vector<string>);
 int from_unit_func(unordered_map<int, vector<string>>, int);
 int more_than_two_units(vector<string>, int);
 double select_value();
-double cel_to_fah();
-double fah_to_cel();
-void cleaner();
+void cleaner(); // cleaner;
 
 // ############################### MAIN
 
