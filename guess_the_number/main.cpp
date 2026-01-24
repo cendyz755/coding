@@ -11,13 +11,16 @@ using std::random_device;
 using std::string;
 using std::uniform_int_distribution;
 
+char user_want_to_continue{'y'};
+void welcome();
 long long check_user_number(long long);
 void guessing_number(long long correct_num);
+void do_you_want_to_continue(char &);
 
 int main() {
-  cout << "Welcome to guess the number game." << '\n';
-  cout << "First, choose the range you want to guess." << '\n';
-
+  if (user_want_to_continue == 'y') {
+    void welcome();
+  }
   long long from{};
   long long to{};
 
@@ -37,7 +40,14 @@ int main() {
 
   guessing_number(x);
 
+  do_you_want_to_continue(user_want_to_continue);
+
   return 0;
+}
+
+inline void welcome(char c) {
+  cout << "Welcome to guess the number game." << '\n';
+  cout << "First, choose the range you want to guess." << '\n';
 }
 
 long long check_user_number(long long from) {
@@ -89,6 +99,33 @@ void guessing_number(long long correct_num) {
     } else {
       cout << "Congrats you guessed the number: " << user_num << "!" << '\n';
       return;
+    }
+  }
+}
+
+void do_you_want_to_continue(char &c) {
+  cout << "Do you want start over? Y/N : ";
+  string mess{"Wrong key. Try again: "};
+
+  string s;
+
+  while (true) {
+    std::getline(cin, s);
+
+    if (s.size() != 1) {
+      cout << mess;
+      continue;
+    }
+
+    if (s == "y" || s == "y") {
+      c = 'n';
+      main();
+      return;
+    } else if (s == "n" || s == "N") {
+      cout << "Bye." << '\n';
+      return;
+    } else {
+      cout << mess;
     }
   }
 }
