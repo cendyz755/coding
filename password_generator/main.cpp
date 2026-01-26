@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <map>
+#include <random>
 #include <string>
 #include <vector>
 using namespace std;
@@ -11,9 +12,13 @@ void welcome();
 void showing_options(map<int, string> *, vector<string> &);
 void selecting_options();
 void adding_deleting_options(map<int, string> *, map<int, string> *,
-                             vector<string> *, vector<string> &, int);
+                             vector<string> *, vector<string> &, string);
 void continue_adding_options();
-template <typename T> void toggle_all(vector<T> &, T);
+void toggle_all(vector<string> &, string);
+void cleaner();
+void generate_password(vector<string> &, int, string);
+
+void selecting_password_size(int &);
 
 map<int, string> *options_names{new map<int, string>};
 map<int, string> *options_values{new map<int, string>};
@@ -21,6 +26,8 @@ map<int, string> *options_values{new map<int, string>};
 vector<string> selected_options{};
 vector<string> selected_values{};
 string still_choosing{"y"};
+int pass_size{};
+string generated_password;
 
 int main() {
   (*options_names)[1] = "lowercase letters";
@@ -40,11 +47,21 @@ int main() {
     selecting_options();
   }
 
+  selecting_password_size(pass_size);
+
   delete options_names;
   delete options_values;
-  // delete selected_options;
+
+  cout << '\n';
+
+  generate_password(selected_values, pass_size, generated_password);
 
   return 0;
+}
+
+void cleaner() {
+  cin.clear();
+  cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
 void welcome() {
@@ -68,8 +85,7 @@ void selecting_options() {
 
     if (!(cin >> num) || (cin.get(c) && c != '\n') || (num > 4 && num < 1)) {
       cout << "Wrong option. Try again: ";
-      cin.clear();
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      cleaner();
       continue;
     }
 
@@ -101,7 +117,7 @@ void selecting_options() {
   }
 }
 
-template <typename T> void toggle_all(vector<T> &v, T value) {
+void toggle_all(vector<string> &v, string value) {
   auto it = find(v.begin(), v.end(), value);
 
   if (it != v.end()) {
@@ -130,4 +146,52 @@ void continue_adding_options() {
       cout << "Wrong key. Try again: ";
     }
   }
+}
+
+void selecting_password_size(int &n) {
+  int num{};
+  char c;
+
+  cout << "Select password length between 6 and 20: ";
+
+  while (true) {
+
+    if (!(cin >> num) || (cin.get(c) && c != '\n')) {
+      cout << "This is not a number try again: ";
+      cleaner();
+      continue;
+    }
+
+    if (num > 20 || num < 6) {
+      cout << "Wrong number. try again: ";
+    } else {
+      n = num;
+      break;
+    }
+  }
+}
+
+void generate_password(vector<string> &opts, int len, string pass) {
+
+  random_device rd;
+  mt19937 gen(rd());
+
+  while (pass.size() < len) {
+    uniform_int_distribution<> dist(0, opts.size() - 1);
+
+    string selected_op{opts[dist(gen)]};
+    uniform_int_distribution<> dist2(0, selected_op.size() - 1);
+
+    if (pass.size() >= len - 3) {
+
+      for (int i{}; i < len - pass.size(); ++i) {
+        pass += selected_op[dist2(gen)];
+      }
+
+    } else {
+      pass += selected_op[dist2(gen)];
+    }
+  }
+
+  cout << "Your password: " << pass << '\n';
 }
