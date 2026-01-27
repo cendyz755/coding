@@ -54,7 +54,9 @@ int main() {
 
   cout << '\n';
 
-  generate_password(selected_values, pass_size, generated_password);
+  while (still_choosing == "n") {
+    generate_password(selected_values, pass_size, generated_password);
+  }
 
   return 0;
 }
@@ -81,11 +83,16 @@ void selecting_options() {
   string s;
 
   while (still_choosing == "y") {
-    cout << "\tWhat option do you want to add: ";
+    cout << "\t\033[92mWhat option do you want to add\033[0m: ";
 
-    if (!(cin >> num) || (cin.get(c) && c != '\n') || (num > 4 && num < 1)) {
-      cout << "Wrong option. Try again: ";
+    if (!(cin >> num) || (cin.get(c) && c != '\n')) {
+      cout << "\033[91mWrong option. Try again\033[0m: \n\n";
       cleaner();
+      continue;
+    }
+
+    if (num > 4 || num < 1) {
+      cout << "This option doesn't exist. Try again: \n\n";
       continue;
     }
 
@@ -110,7 +117,7 @@ void selecting_options() {
     if (selected_values.size() >= 2) {
       cout << "There is already " << selected_values.size()
            << " selected options." << '\n';
-      cout << "Do you want to continue adding options? Y/N: ";
+      cout << "Do you want to continue adding options? \033[33mY/N\033[0m: ";
 
       continue_adding_options();
     }
@@ -134,7 +141,7 @@ void continue_adding_options() {
     getline(cin, s);
 
     if (s.size() != 1) {
-      cout << "Wrong key. Try again: ";
+      cout << "\033[91mWrong key. Try again: \033[0m";
     }
 
     if (s == "y" || s == "Y") {
@@ -143,7 +150,7 @@ void continue_adding_options() {
       still_choosing = "n";
       return;
     } else {
-      cout << "Wrong key. Try again: ";
+      cout << "\033[91mWrong key. Try again: \033[0m";
     }
   }
 }
@@ -152,18 +159,19 @@ void selecting_password_size(int &n) {
   int num{};
   char c;
 
-  cout << "Select password length between 6 and 20: ";
+  cout << "Select password length between \033[94m6\033[0m and "
+          "\033[94m20\033[0m: ";
 
   while (true) {
 
     if (!(cin >> num) || (cin.get(c) && c != '\n')) {
-      cout << "This is not a number try again: ";
+      cout << "\033[91mThis is not a number try again\033[0m: ";
       cleaner();
       continue;
     }
 
     if (num > 20 || num < 6) {
-      cout << "Wrong number. try again: ";
+      cout << "\033[91mWrong number. try again\033[0m: ";
     } else {
       n = num;
       break;
@@ -194,4 +202,27 @@ void generate_password(vector<string> &opts, int len, string pass) {
   }
 
   cout << "Your password: " << pass << '\n';
+
+  cout << "Would you regenerate your password? \033[33mY/N\033[0m: ";
+
+  string p;
+
+  while (true) {
+    getline(cin, p);
+
+    if (p.size() != 1) {
+      cout << "\033[91mWrong key. Try again\033[0m: ";
+      continue;
+    }
+
+    if (p == "y" || p == "y") {
+      break;
+    } else if (p == "n" || p == "N") {
+      still_choosing = "y";
+      cout << "Bye." << '\n';
+      break;
+    } else {
+      cout << "\033[91mWrong key. Try again\033[0m: ";
+    }
+  }
 }
