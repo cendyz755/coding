@@ -10,9 +10,13 @@ private:
   int day{};
 
 public:
+  IdValidator();
+  void userInsertingID();
+  void showUserID();
   bool idSizeChecking();
   bool is_a_number(int);
-  bool checkingYear();
-  bool monthChecking();
-  bool dayChecking();
+  void settingYear();
+  bool settingMonth();
+  int monthDayLimit(int);
+  bool settingDay();
 };
