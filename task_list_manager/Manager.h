@@ -3,7 +3,6 @@
 #include <vector>
 using std::string;
 using std::vector;
-// using std::fstream;
 
 class Manager {
 private:
@@ -19,4 +18,5 @@ public:
   void addTask();
   void deleteTask();
   int taskCounter();
+  void editTask();
 };
