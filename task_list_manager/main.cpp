@@ -1,15 +1,12 @@
-#include "./Manager.h"
-#include <iostream>
-#include <vector>
-using namespace std;
+#include "ToDoManager.h"
 
 int main() {
 
-  Manager user_tasks;
-
-  // while (true) {
-  user_tasks.selectingOption();
-  // }
+  ToDoManager userTasks;
+  while (!userTasks.terminateProgram) {
+    userTasks.showingOptions();
+    userTasks.userSelectingOption();
+  }
 
   return 0;
 }
