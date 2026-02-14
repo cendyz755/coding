@@ -4,6 +4,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <random>
+#include <string>
 using std::cin;
 using std::cout;
 using std::getline;
@@ -16,7 +18,24 @@ Bank::Bank() {
   for (int i{1}; i <= this->startOptions.size(); ++i) {
     cout << '\t' << i << ". " << startOptions[i - 1] << '\n';
   }
+  this->isAccountsDatabaseExists();
   this->checkingAccountsDatabase();
+}
+
+void Bank::isAccountsDatabaseExists() {
+  fs::path databasePath(this->databaseFilePath);
+  if (!fs::exists(databasePath)) {
+    ofstream database(this->databaseFilePath);
+  }
+}
+
+void Bank::checkingAccountsDatabase() {
+  ifstream database(this->databaseFilePath);
+  string account;
+  while (getline(database, account)) {
+    if (!this->checkingAccount(account))
+      break;
+  }
 }
 
 void Bank::userChosingOption() {
@@ -25,6 +44,7 @@ void Bank::userChosingOption() {
     if (!this->validateUserOption())
       cout << this->wrongOptionMessage << this->tryAgainMessage;
   }
+  this->executeSelectedOption();
 }
 
 bool Bank::validateUserOption() {
@@ -36,6 +56,7 @@ bool Bank::validateUserOption() {
   if (this->userOption < 1 || this->userOption > this->startOptions.size())
     return false;
   this->isUserOptionOk = true;
+  cout << "to jest opcja: " << this->userOption << '\n';
   return true;
 }
 
@@ -47,22 +68,63 @@ void Bank::executeSelectedOption() {
   };
 }
 
-void Bank::registerAccount() {}
+void Bank::registerAccount() { Bank::userInsertingNameSurname(); }
 
-void Bank::checkingAccountsDatabase() {
-  fs::path databasePath(this->databaseFilePath);
-  if (!fs::exists(databasePath)) {
-    ofstream database(this->databaseFilePath);
+void Bank::userInsertingNameSurname() {
+  while (!this->isEverythingFine) {
+    this->checkingUserFullnameSize();
   }
-  ifstream database(this->databaseFilePath);
-  string singleAccountDetails;
-  while (getline(database, singleAccountDetails)) {
-    if (!this->checkingSingleAccountDetails(singleAccountDetails))
-      break;
-  }
+  this->isEverythingFine = false;
+  this->generateUserId();
 }
 
-bool Bank::checkingSingleAccountDetails(string accountDetails) {
+bool Bank::checkingUserFullnameSize() {
+  cout << this->askingName;
+  getline(cin, this->tempUserName);
+  cout << this->askingSurname;
+  getline(cin, this->tempUserSurname);
+
+  if (this->tempUserName.size() > this->maximumNameSurnameSize ||
+      this->tempUserName.size() < this->minimumNameSurnameSize ||
+      this->tempUserSurname.size() > this->maximumNameSurnameSize ||
+      this->tempUserSurname.size() < this->minimumNameSurnameSize) {
+    cout << this->wrongNameSize << '\n';
+    return false;
+  }
+
+  if (!this->isUserNameContainsSymbols(this->tempUserName) ||
+      !this->isUserNameContainsSymbols(this->tempUserSurname)) {
+    cout << this->wrongName << '\n';
+    return false;
+  }
+
+  this->isEverythingFine = true;
+
+  return true;
+}
+
+void Bank::generateUserId() {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dist(0, this->symbolsForId.size() - 1);
+
+  while (this->id.size() < this->minimumIdLen) {
+    char temp{this->symbolsForId[dist(gen)]};
+    this->id += temp;
+  }
+
+  cout << "Twoje id: " << this->id << '\n';
+}
+
+bool Bank::isUserNameContainsSymbols(string name) {
+  for (char &c : name) {
+    if (!isalpha(c))
+      return false;
+  }
+  return true;
+}
+
+bool Bank::checkingAccount(string accountDetails) {
   if (std::count(accountDetails.begin(), accountDetails.end(),
                  this->accountInfoSeparator) !=
           this->correctNumberOfSeparators ||
