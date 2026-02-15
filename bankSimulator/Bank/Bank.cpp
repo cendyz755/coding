@@ -56,7 +56,6 @@ bool Bank::validateUserOption() {
   if (this->userOption < 1 || this->userOption > this->startOptions.size())
     return false;
   this->isUserOptionOk = true;
-  cout << "to jest opcja: " << this->userOption << '\n';
   return true;
 }
 
@@ -68,14 +67,17 @@ void Bank::executeSelectedOption() {
   };
 }
 
-void Bank::registerAccount() { Bank::userInsertingNameSurname(); }
+void Bank::registerAccount() {
+  this->userInsertingNameSurname();
+  this->userInsertingPassword();
+  this->generateUserId();
+}
 
 void Bank::userInsertingNameSurname() {
   while (!this->isEverythingFine) {
     this->checkingUserFullnameSize();
   }
   this->isEverythingFine = false;
-  this->generateUserId();
 }
 
 bool Bank::checkingUserFullnameSize() {
@@ -84,17 +86,17 @@ bool Bank::checkingUserFullnameSize() {
   cout << this->askingSurname;
   getline(cin, this->tempUserSurname);
 
-  if (this->tempUserName.size() > this->maximumNameSurnameSize ||
-      this->tempUserName.size() < this->minimumNameSurnameSize ||
-      this->tempUserSurname.size() > this->maximumNameSurnameSize ||
-      this->tempUserSurname.size() < this->minimumNameSurnameSize) {
-    cout << this->wrongNameSize << '\n';
+  if (this->tempUserName.size() > this->maxNameSurnameLen ||
+      this->tempUserName.size() < this->minNameSurnameLen ||
+      this->tempUserSurname.size() > this->maxNameSurnameLen ||
+      this->tempUserSurname.size() < this->minNameSurnameLen) {
+    cout << this->redColor << this->wrongNameSize << this->colorReset << '\n';
     return false;
   }
 
   if (!this->isUserNameContainsSymbols(this->tempUserName) ||
       !this->isUserNameContainsSymbols(this->tempUserSurname)) {
-    cout << this->wrongName << '\n';
+    cout << this->redColor << this->wrongNameMess << this->colorReset << '\n';
     return false;
   }
 
@@ -103,25 +105,59 @@ bool Bank::checkingUserFullnameSize() {
   return true;
 }
 
-void Bank::generateUserId() {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dist(0, this->symbolsForId.size() - 1);
-
-  while (this->id.size() < this->minimumIdLen) {
-    char temp{this->symbolsForId[dist(gen)]};
-    this->id += temp;
-  }
-
-  cout << "Twoje id: " << this->id << '\n';
-}
-
 bool Bank::isUserNameContainsSymbols(string name) {
   for (char &c : name) {
     if (!isalpha(c))
       return false;
   }
   return true;
+}
+
+void Bank::userInsertingPassword() {
+  while (!this->isEverythingFine) {
+    this->checkingUserPassword();
+  }
+}
+
+void Bank::checkingUserPassword() {
+  cout << this->newPassMess;
+  getline(cin, this->password);
+  if (this->password.size() > this->maxPassLen ||
+      this->password.size() < this->minPassLen) {
+    cout << this->redColor << this->wrongPassLenMess << this->colorReset
+         << '\n';
+    return;
+  }
+
+  if (!this->isStrongPassword()) {
+    cout << this->redColor << this->wrongPassSymbolsMess << this->colorReset
+         << '\n';
+    return;
+  }
+
+  this->isEverythingFine = true;
+}
+
+bool Bank::isStrongPassword() {
+  if (this->password.find_first_of(this->passLegalSymbols[0]) == string::npos ||
+      this->password.find_first_of(this->passLegalSymbols[1]) == string::npos ||
+      this->password.find_first_of(this->passLegalSymbols[2]) == string::npos)
+    return false;
+  return true;
+}
+
+void Bank::generateUserId() {
+  while (this->id.size() < this->minimumIdLen) {
+    this->chooseSymbolForId();
+  }
+}
+
+void Bank::chooseSymbolForId() {
+  std::uniform_int_distribution<> whichSymbolsType(
+      0, this->symbolsForId.size() - 1);
+  string type{this->symbolsForId[whichSymbolsType(this->gen)]};
+  std::uniform_int_distribution<> specificSymbol(0, type.size() - 1);
+  this->id += type[specificSymbol(this->gen)];
 }
 
 bool Bank::checkingAccount(string accountDetails) {
