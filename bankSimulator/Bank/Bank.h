@@ -10,9 +10,9 @@ using std::vector;
 
 class Bank {
 private:
-  string databaseFilePath{"database.txt"};
+  string databaseFilePath{"database.csv"};
   string welcomeMessage{"Welcome to the bank!"};
-  string selectingMessage{"What do you want do now: "};
+  string startingOptsMess{"What do you want do now: "};
   string wrongOptionMessage{"Wrong option. "};
   string wrongPassLenMess{"Password length must be between 5 and 20"};
   string tryAgainMessage{"Try again: "};
@@ -31,12 +31,13 @@ private:
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
   vector<string> symbolsForId{"0123456789", "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
                               "$&#"};
+  vector<int> idLen{5, 10};
   string id;
-  string tempUserName;
-  string tempUserSurname;
+  string userName;
+  string userSurname;
+  string wrongNewIdMess{"Id length mus be between 0 and 10"};
   random_device rd;
   mt19937 gen{this->rd()};
-  bool isEverythingFine{false};
   int passwordMinimumLength{5};
   int passwordMaximumLength{16};
   int minimumIdLen{7};
@@ -50,6 +51,9 @@ private:
   int minNameSurnameLen{3};
   int maxNameSurnameLen{15};
   int minPassLen{7};
+  void checkIdSize();
+  void userInsertingId();
+  bool idAlreadyExists();
   int maxPassLen{20};
   int login{};
   string password;
@@ -64,18 +68,17 @@ public:
   void checkBalance();
   void depositMoney();
   void withdrawMoney();
-  void userChosingOption();
+  void userChosingStartingOption();
   bool validateUserOption();
   void executeSelectedOption();
-  void checkingAccountsDatabase();
   bool checkingAccount(string account);
-  void chooseSymbolForId();
+  bool chooseSymbolForId();
   void generateUserId();
   bool checkingAccountId(string id);
   void isAccountsDatabaseExists();
   void userInsertingNameSurname();
   void checkingUserPassword();
-  bool isStrongPassword();
+  void isStrongPassword();
   void userInsertingPassword();
   bool checkingUserFullnameSize();
   bool isUserNameContainsSymbols(string name);

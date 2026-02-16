@@ -11,156 +11,186 @@ using std::cout;
 using std::getline;
 using std::ifstream;
 using std::ofstream;
+#include <sstream>
 namespace fs = std::filesystem;
 
 Bank::Bank() {
+
   cout << this->welcomeMessage << '\n';
   for (int i{1}; i <= this->startOptions.size(); ++i) {
     cout << '\t' << i << ". " << startOptions[i - 1] << '\n';
   }
   this->isAccountsDatabaseExists();
-  this->checkingAccountsDatabase();
 }
 
 void Bank::isAccountsDatabaseExists() {
+
   fs::path databasePath(this->databaseFilePath);
+
   if (!fs::exists(databasePath)) {
     ofstream database(this->databaseFilePath);
   }
 }
 
-void Bank::checkingAccountsDatabase() {
-  ifstream database(this->databaseFilePath);
-  string account;
-  while (getline(database, account)) {
-    if (!this->checkingAccount(account))
-      break;
-  }
-}
+void Bank::userChosingStartingOption() {
 
-void Bank::userChosingOption() {
-  cout << this->selectingMessage;
-  while (!this->isUserOptionOk) {
-    if (!this->validateUserOption())
-      cout << this->wrongOptionMessage << this->tryAgainMessage;
+  cout << this->startingOptsMess;
+
+  if (!this->validateUserOption()) {
+    cout << this->wrongOptionMessage << this->tryAgainMessage;
+    this->validateUserOption();
+    return;
   }
+
   this->executeSelectedOption();
 }
 
 bool Bank::validateUserOption() {
+
   getline(cin, this->tempUserOption);
+
   if (tempUserOption.size() != 1) {
     return false;
   }
+
   this->userOption = this->tempUserOption[0] - this->toZeroUnix;
+
   if (this->userOption < 1 || this->userOption > this->startOptions.size())
     return false;
-  this->isUserOptionOk = true;
+
   return true;
 }
 
 void Bank::executeSelectedOption() {
+
   switch (this->userOption) {
   case 2:
     this->registerAccount();
     break;
   };
+
+  this->userOption = 0;
 }
 
 void Bank::registerAccount() {
+
   this->userInsertingNameSurname();
+
   this->userInsertingPassword();
-  this->generateUserId();
+
+  this->userInsertingId();
 }
 
 void Bank::userInsertingNameSurname() {
-  while (!this->isEverythingFine) {
-    this->checkingUserFullnameSize();
-  }
-  this->isEverythingFine = false;
-}
 
-bool Bank::checkingUserFullnameSize() {
   cout << this->askingName;
-  getline(cin, this->tempUserName);
+  getline(cin, this->userName);
+
   cout << this->askingSurname;
-  getline(cin, this->tempUserSurname);
+  getline(cin, this->userSurname);
 
-  if (this->tempUserName.size() > this->maxNameSurnameLen ||
-      this->tempUserName.size() < this->minNameSurnameLen ||
-      this->tempUserSurname.size() > this->maxNameSurnameLen ||
-      this->tempUserSurname.size() < this->minNameSurnameLen) {
+  if (this->userName.size() > this->maxNameSurnameLen ||
+      this->userName.size() < this->minNameSurnameLen ||
+      this->userSurname.size() > this->maxNameSurnameLen ||
+      this->userSurname.size() < this->minNameSurnameLen) {
     cout << this->redColor << this->wrongNameSize << this->colorReset << '\n';
-    return false;
+    this->userInsertingNameSurname();
+    return;
   }
 
-  if (!this->isUserNameContainsSymbols(this->tempUserName) ||
-      !this->isUserNameContainsSymbols(this->tempUserSurname)) {
+  if (!this->isUserNameContainsSymbols(this->userName) ||
+      !this->isUserNameContainsSymbols(this->userSurname)) {
     cout << this->redColor << this->wrongNameMess << this->colorReset << '\n';
-    return false;
+    this->userInsertingNameSurname();
+    return;
   }
-
-  this->isEverythingFine = true;
-
-  return true;
 }
 
 bool Bank::isUserNameContainsSymbols(string name) {
+
   for (char &c : name) {
     if (!isalpha(c))
       return false;
   }
+
   return true;
 }
 
 void Bank::userInsertingPassword() {
-  while (!this->isEverythingFine) {
-    this->checkingUserPassword();
-  }
-}
 
-void Bank::checkingUserPassword() {
   cout << this->newPassMess;
   getline(cin, this->password);
+
   if (this->password.size() > this->maxPassLen ||
       this->password.size() < this->minPassLen) {
     cout << this->redColor << this->wrongPassLenMess << this->colorReset
          << '\n';
+    this->userInsertingPassword();
     return;
   }
 
   if (!this->isStrongPassword()) {
     cout << this->redColor << this->wrongPassSymbolsMess << this->colorReset
          << '\n';
+    this->userInsertingPassword();
     return;
   }
 
-  this->isEverythingFine = true;
+  this->isStrongPassword();
 }
 
-bool Bank::isStrongPassword() {
+void Bank::isStrongPassword() {
+
   if (this->password.find_first_of(this->passLegalSymbols[0]) == string::npos ||
       this->password.find_first_of(this->passLegalSymbols[1]) == string::npos ||
-      this->password.find_first_of(this->passLegalSymbols[2]) == string::npos)
-    return false;
-  return true;
-}
-
-void Bank::generateUserId() {
-  while (this->id.size() < this->minimumIdLen) {
-    this->chooseSymbolForId();
+      this->password.find_first_of(this->passLegalSymbols[2]) == string::npos) {
+    this->userInsertingPassword();
+    return;
   }
 }
 
-void Bank::chooseSymbolForId() {
-  std::uniform_int_distribution<> whichSymbolsType(
-      0, this->symbolsForId.size() - 1);
-  string type{this->symbolsForId[whichSymbolsType(this->gen)]};
-  std::uniform_int_distribution<> specificSymbol(0, type.size() - 1);
-  this->id += type[specificSymbol(this->gen)];
+void Bank::userInsertingId() {
+  this->checkIdSize();
+  this->idAlreadyExists();
+}
+
+void Bank::checkIdSize() {
+
+  cout << "Your id: ";
+  getline(cin, this->id);
+
+  if (this->id.size() > this->idLen[1] || this->id.size() < this->idLen[0]) {
+    cout << this->wrongNewIdMess << '\n';
+    this->checkIdSize();
+  }
+}
+
+bool Bank::idAlreadyExists() {
+
+  ifstream database{this->databaseFilePath};
+
+  string line;
+
+  while (getline(database, line)) {
+
+    std::stringstream ss(line);
+
+    string id;
+
+    getline(ss, id, ';');
+
+    if (id == this->id) {
+      cout << "This id already exists. Choose other id." << '\n';
+      this->userInsertingId();
+      return false;
+    }
+  }
+
+  return true;
 }
 
 bool Bank::checkingAccount(string accountDetails) {
+
   if (std::count(accountDetails.begin(), accountDetails.end(),
                  this->accountInfoSeparator) !=
           this->correctNumberOfSeparators ||
@@ -170,9 +200,11 @@ bool Bank::checkingAccount(string accountDetails) {
 }
 
 bool Bank::checkingAccountId(string id) {
+
   if (id.size() < this->passwordMinimumLength ||
       id.size() > this->passwordMaximumLength ||
       id.find_first_of(this->specialSymbols) != string::npos)
     return false;
+
   return true;
 }

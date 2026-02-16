@@ -3,7 +3,7 @@
 int main() {
 
   Bank bank;
-  bank.userChosingOption();
+  bank.userChosingStartingOption();
 
   return 0;
 }
