@@ -14,11 +14,17 @@ namespace fs = std::filesystem;
 
 Bank::Bank() {
     cout << this->welcomeMessage << '\n';
+    this->showMenu();
+
+    this->isAccountsDatabaseExists();
+
+    this->selectingStartOption();
+}
+
+void Bank::showMenu() const {
     for (int i{1}; i <= this->startOptions.size(); ++i) {
         cout << '\t' << i << ". " << startOptions[i - 1] << '\n';
     }
-    this->isAccountsDatabaseExists();
-    this->selectingStartOption();
 }
 
 void Bank::isAccountsDatabaseExists() const {
@@ -28,39 +34,31 @@ void Bank::isAccountsDatabaseExists() const {
 }
 
 void Bank::selectingStartOption() {
-    cout << this->startingOptsMess;
-
-    if (!this->validateUserOption()) {
-        cout << this->wrongOptionMessage << this->tryAgainMessage;
-        this->validateUserOption();
-        return;
+    while (!this->validateUserOption()) {
+        cout << this->redColor << this->wrongOptionMessage << this->colorReset << '\n';
     }
 
     this->executeSelectedOption();
 }
 
 bool Bank::validateUserOption() {
-    getline(cin, this->tempUserOption);
+    cout << this->startingOptsMess;
+    getline(cin, this->userOption);
 
-    if (tempUserOption.size() != 1) {
+    if (!regex_match(this->userOption, this->menuOptRegex)) {
         return false;
     }
-
-    this->userOption = this->tempUserOption[0] - this->toZeroUnix;
-
-    if (this->userOption < 1 || this->userOption > this->startOptions.size())
-        return false;
 
     return true;
 }
 
 void Bank::executeSelectedOption() {
-    switch (this->userOption) {
-        case 2:
-            this->registerAccount();
-            break;
-        default: this->userOption = 0;
-    };
+    if (this->userOption == "2") {
+        this->registerAccount();
+    }
+
+    this->showMenu();
+    this->selectingStartOption();
 }
 
 void Bank::registerAccount() {
@@ -78,98 +76,76 @@ void Bank::registerAccount() {
 }
 
 void Bank::userInsertingNameSurname() {
+    while (!this->validateUsername()) {
+        cout << this->redColor << this->wrongNameMess << this->colorReset << '\n';
+    }
+}
+
+bool Bank::validateUsername() {
     cout << this->askingName;
     getline(cin, this->userName);
 
     cout << this->askingSurname;
     getline(cin, this->userSurname);
 
-    if (this->userName.size() > this->nameLen[1] ||
-        this->userName.size() < this->nameLen[0] ||
-        this->userSurname.size() > this->nameLen[1] ||
-        this->userSurname.size() < this->nameLen[0]) {
-        cout << this->redColor << this->wrongNameSize << this->colorReset <<
-                '\n';
-        this->userInsertingNameSurname();
-        return;
+    if (!regex_match(this->userName, this->nameRegex) ||
+        !regex_match(this->userSurname, this->nameRegex)) {
+        return false;
     }
 
-    if (!Bank::isUserNameContainsSymbols(this->userName) ||
-        !Bank::isUserNameContainsSymbols(this->userSurname)) {
-        cout << this->redColor << this->wrongNameMess << this->colorReset <<
-                '\n';
-        this->userInsertingNameSurname();
-        return;
-    }
-}
-
-bool Bank::isUserNameContainsSymbols(string name) {
-    const bool onlyLetters{
-        std::all_of(name.begin(), name.end(), [](char c) { return isalpha(c); })
-    };
-
-    return onlyLetters;
+    return true;
 }
 
 void Bank::userInsertingPassword() {
+    while (!this->validatePassword()) {
+        cout << this->redColor << this->wrongNewPassMess <<
+                this->colorReset << '\n';
+    }
+}
+
+bool Bank::validatePassword() {
     cout << this->newPassMess;
     getline(cin, this->password);
 
-    if (this->password.size() > this->passLen[1] ||
-        this->password.size() < this->passLen[0]) {
-        cout << this->redColor << this->wrongPassLenMess << this->colorReset
-                << '\n';
-        this->userInsertingPassword();
-        return;
+    if (!regex_match(this->password, this->passRegex)) {
+        return false;
     }
 
-    this->isStrongPassword();
-}
-
-void Bank::isStrongPassword() {
-    if (this->password.find_first_of(this->passLegalSymbols[0]) == string::npos
-        ||
-        this->password.find_first_of(this->passLegalSymbols[1]) == string::npos
-        ||
-        this->password.find_first_of(this->passLegalSymbols[2]) == string::npos) {
-        cout << this->redColor << this->wrongPassSymbolsMess << this->colorReset
-                << '\n';
-        this->userInsertingPassword();
-    }
+    return true;
 }
 
 void Bank::generateId() {
     while (--this->idLen + 1) {
-        this->tempId += std::to_string(this->dist(this->gen));
+        this->id += std::to_string(this->dist(this->gen));
     }
 
-    this->id = stoi(this->tempId);
-
-    this->idAlreadyExists();
+    if (!this->idAlreadyExists()) {
+        this->generateId();
+    }
 }
 
 
-void Bank::idAlreadyExists() {
+bool Bank::idAlreadyExists() const {
     ifstream databasePath{this->databaseFilePath};
     string accountDetails;
 
     while (getline(databasePath, accountDetails)) {
-        if (this->lookingForTheSameIdInFile(accountDetails)) {
-            this->generateId();
-            return;
+        if (!this->lookingForTheSameIdInFile(accountDetails)) {
+            return false;
         }
     }
+
+    return true;
 }
 
-bool Bank::lookingForTheSameIdInFile(string accountDetails) const {
+bool Bank::lookingForTheSameIdInFile(const string &accountDetails) const {
     std::stringstream ss(accountDetails);
 
     string accountId;
-    getline(ss, accountDetails, ';');
+    getline(ss, accountId, ';');
 
-    if (const int numId{stoi(accountId)}; numId == this->id) {
+    if (accountId == this->id)
         return false;
-    }
 
     return true;
 }
@@ -183,7 +159,7 @@ void Bank::userInsertingEmail() {
     }
 }
 
-bool Bank::validateEmail() {
+bool Bank::validateEmail() const {
     return std::regex_match(this->email, this->emailRegex);
 }
 
@@ -193,7 +169,7 @@ void Bank::addAccountToDatabase() const {
     string accountDetails;
 
     while (getline(databaseFile, accountDetails)) {
-        tempDatabaseFile << accountDetails;
+        tempDatabaseFile << accountDetails << '\n';
     }
 
     tempDatabaseFile << this->id << ';' << this->userName << ';' << this->userSurname
