@@ -1,7 +1,6 @@
 #ifndef BANK_BANK_H
 #define BANK_BANK_H
 
-
 #include <random>
 #include <regex>
 #include <string>
@@ -59,15 +58,15 @@ private:
     void userInsertingPassword();
     [[nodiscard]] bool validatePassword();
 
-    short int idLen{8};
     string id{};
     std::random_device rd;
     std::mt19937 gen{rd()};
     std::uniform_int_distribution<> dist{0, 9};
     void generateId();
     [[nodiscard]] bool idAlreadyExists() const;
-    [[nodiscard]] bool lookingForTheSameIdInFile(const string &accountDetails) const;
+    [[nodiscard]] bool lookingForTheSameIdInFile(const string& accountDetails) const;
 
+    string sameEmailMess{"This e-mail already exists."};
     regex emailRegex{
         R"(^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$)"
     };
@@ -76,17 +75,25 @@ private:
     string email;
     void userInsertingEmail();
     [[nodiscard]] bool validateEmail() const;
+    [[nodiscard]] bool emailAlreadyExists() const;
 
     string tempDb{"tempDb.csv"};
     void addAccountToDatabase() const;
 
     string accSuccCreatedMess{"Account created successfully!"};
     string newAccInfoMess{"Your new account details: "};
-    void accountCreated() const;
+    void accountCreated();
+    void resetClassInfo();
+
+    void login();
+
+    bool idOk{};
+    bool passOk{};
+    void loginInId();
+    bool idAndPassInDatabase() const;
 
 public:
     Bank();
 };
-
 
 #endif //BANK_BANK_H

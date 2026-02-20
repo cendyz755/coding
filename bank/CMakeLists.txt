@@ -3,6 +3,7 @@ project(bank)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(bank main.cpp
-        Bank.cpp
-        Bank.h)
+add_executable(Bank.cpp
+        Bank.h
+        main.cpp
+        Bank.cpp)
