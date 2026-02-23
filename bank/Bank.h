@@ -5,10 +5,14 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <map>
+#include <unordered_map>
+using std::map;
 using std::string;
 using std::vector;
 using std::regex;
 using std::regex_match;
+using std::all_of;
 
 class Bank {
 private:
@@ -16,12 +20,16 @@ private:
     string blueColor{"\033[94m"};
     string colorReset{"\033[0m"};
     string welcomeMessage{"Welcome to the bank!"};
-    vector<string> startOptions{"Login", "Register", "Exit"};
+    vector<string> startOptions{"Login", "Register", "Recover password", "Exit"};
+    vector<string> accInfo{"id", "email", "name", "surname", "pass", "balance"};
+    map<int, std::unordered_map<string, string>> accountsData;
+    void loadDataToFile();
+    void insertDataToVariable(const string& accountData);
     void selectingStartOption();
     void showMenu() const;
 
     string databaseFilePath{"database.csv"};
-    void isAccountsDatabaseExists() const;
+    void isAccountsDatabaseExists();
 
     regex menuOptRegex{R"(^[1-3]$)"};
     string userOption;
@@ -59,12 +67,13 @@ private:
     [[nodiscard]] bool validatePassword();
 
     string id{};
+    int numId{};
     std::random_device rd;
     std::mt19937 gen{rd()};
     std::uniform_int_distribution<> dist{0, 9};
     void generateId();
-    [[nodiscard]] bool idAlreadyExists() const;
-    [[nodiscard]] bool lookingForTheSameIdInFile(const string& accountDetails) const;
+    bool isIdANum();
+    [[nodiscard]] bool idAlreadyExists();
 
     string sameEmailMess{"This e-mail already exists."};
     regex emailRegex{
@@ -77,8 +86,14 @@ private:
     [[nodiscard]] bool validateEmail() const;
     [[nodiscard]] bool emailAlreadyExists() const;
 
+    string wrongEmailIdMess{"Wrong email or id"};
+    void recoveringPassword();
+    void showRecoveredPassword();
+    bool isTheSameEmail();
+
     string tempDb{"tempDb.csv"};
     void addAccountToDatabase() const;
+    void addAccountToVariable();
 
     string accSuccCreatedMess{"Account created successfully!"};
     string newAccInfoMess{"Your new account details: "};
@@ -87,10 +102,14 @@ private:
 
     void login();
 
+    string idMess{"Your id: "};
+    string passMess{"Your pass: "};
+    string wrongLoginPassMess{"Wrong login or password."};
+    string successfulLoginMess{"Login successfully!"};
     bool idOk{};
     bool passOk{};
     void loginInId();
-    bool idAndPassInDatabase() const;
+    bool idAndPassInDatabase();
 
 public:
     Bank();

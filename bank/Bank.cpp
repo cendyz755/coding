@@ -14,10 +14,10 @@ using std::stringstream;
 namespace fs = std::filesystem;
 
 Bank::Bank() {
+    this->isAccountsDatabaseExists();
+
     cout << this->welcomeMessage << '\n';
     this->showMenu();
-
-    this->isAccountsDatabaseExists();
 
     this->selectingStartOption();
 }
@@ -28,9 +28,21 @@ void Bank::showMenu() const {
     }
 }
 
-void Bank::isAccountsDatabaseExists() const {
+void Bank::isAccountsDatabaseExists() {
     if (const fs::path databasePath(this->databaseFilePath); !fs::exists(databasePath)) {
         ofstream database(this->databaseFilePath);
+    }
+    else {
+        this->loadDataToFile();
+    }
+}
+
+void Bank::loadDataToFile() {
+    ifstream databaseFile{this->databaseFilePath};
+    string line;
+
+    while (getline(databaseFile, line)) {
+        this->insertDataToVariable(line);
     }
 }
 
@@ -40,6 +52,19 @@ void Bank::selectingStartOption() {
     }
 
     this->executeSelectedOption();
+}
+
+void Bank::insertDataToVariable(const string& accountData) {
+    stringstream ss(accountData);
+    string cell;
+    const int userId{stoi(accountData.substr(0, 8))};
+
+    int field{};
+
+    while (getline(ss, cell, ';')) {
+        this->accountsData[userId][this->accInfo[field]] = cell;
+        ++field;
+    }
 }
 
 bool Bank::validateUserOption() {
@@ -54,12 +79,15 @@ bool Bank::validateUserOption() {
 }
 
 void Bank::executeSelectedOption() {
-    if (this->userOption == "2") {
-        this->registerAccount();
-    }
-    else if (this->userOption == "1") {
+    if (this->userOption == "1") {
         this->login();
         return;
+    }
+    else if (this->userOption == "2") {
+        this->registerAccount();
+    }
+    else if (this->userOption == "3") {
+        this->recoveringPassword();
     }
 
     this->showMenu();
@@ -71,42 +99,34 @@ void Bank::login() {
 }
 
 void Bank::loginInId() {
-    cout << "Your id: ";
+    cout << this->idMess;
     getline(cin, this->id);
 
-    cout << "Your password: ";
+    cout << this->passMess;
     getline(cin, this->password);
 
     if (!this->idAndPassInDatabase()) {
-        cout << this->redColor << "Wrong login or password." << this->colorReset << '\n';
+        cout << this->redColor << this->wrongEmailMess << this->colorReset << '\n';
         this->loginInId();
     }
     else {
-        cout << this->blueColor << "Login successfully!" << this->colorReset << '\n';
+        cout << this->blueColor << this->successfulLoginMess << this->colorReset << '\n';
     }
 }
 
-bool Bank::idAndPassInDatabase() const {
-    ifstream databaseFile{this->databaseFilePath};
-    string accDetails;
-    vector<string> idPass(5, "");
+bool Bank::idAndPassInDatabase() {
+    if (!this->isIdANum())
+        return false;
 
-    while (getline(databaseFile, accDetails)) {
-        stringstream ss(accDetails);
-        string cell;
+    int const idToNum{stoi(this->id)};
 
-        int i{};
-        while (getline(ss, cell, ';') && i < 5) {
-            idPass[i] = cell;
-            ++i;
-        }
+    if (!this->accountsData.contains(idToNum))
+        return false;
 
-        if (idPass[0] == this->id && this->password == idPass[4]) {
-            return true;
-        }
-    }
+    if (this->accountsData[idToNum]["pass"] != this->password)
+        return false;
 
-    return false;
+    return true;
 }
 
 void Bank::registerAccount() {
@@ -119,6 +139,8 @@ void Bank::registerAccount() {
     this->userInsertingEmail();
 
     this->addAccountToDatabase();
+
+    this->addAccountToVariable();
 
     this->accountCreated();
 }
@@ -172,34 +194,28 @@ void Bank::generateId() {
     if (!this->idAlreadyExists()) {
         this->generateId();
     }
+    else {
+        this->numId = stoi(this->id);
+    }
 }
 
-bool Bank::idAlreadyExists() const {
-    ifstream databasePath{this->databaseFilePath};
-    string accountDetails;
-
-    while (getline(databasePath, accountDetails)) {
-        if (!this->lookingForTheSameIdInFile(accountDetails)) {
-            return false;
-        }
-    }
+bool Bank::idAlreadyExists() {
+    if (!this->isIdANum() || this->accountsData.contains(this->numId))
+        return false;
 
     return true;
 }
 
-bool Bank::lookingForTheSameIdInFile(const string& accountDetails) const {
-    stringstream ss(accountDetails);
-    string accId;
-
-    int i{};
-    while (getline(ss, accId, ';') && i < 1) {
-        if (accId == this->id) {
-            return false;
-        }
-        ++i;
+bool Bank::isIdANum() {
+    if (all_of(this->id.begin(),
+               this->id.end(),
+               [](const char& c) {
+                   return isdigit(c);
+               })) {
+        this->numId = stoi(this->id);
+        return true;
     }
-
-    return true;
+    return false;
 }
 
 void Bank::userInsertingEmail() {
@@ -225,22 +241,37 @@ bool Bank::validateEmail() const {
 }
 
 bool Bank::emailAlreadyExists() const {
-    ifstream databaseFile{this->databaseFilePath};
-    string accInfo;
+    return all_of(this->accountsData.begin(), this->accountsData.end(),
+                  [this](const auto& pair) {
+                      const auto& acc{pair.second};
+                      auto it{acc.find("email")};
 
-    while (getline(databaseFile, accInfo)) {
-        stringstream ss(accInfo);
-        string accEmail;
+                      return it->second != this->email;
+                  });
+}
 
-        int i{};
-        while (getline(ss, accEmail, ';') && i < 2) {
-            if (accEmail == this->email)
-                return false;
-            ++i;
-        }
+void Bank::recoveringPassword() {
+    cout << this->idMess;
+    getline(cin, this->id);
+
+    cout << this->emailMess;
+    getline(cin, this->email);
+
+    if (!this->isIdANum() || !this->isTheSameEmail()) {
+        cout << this->redColor << this->wrongEmailIdMess << this->colorReset << '\n';
+        this->recoveringPassword();
     }
+    else {
+        this->showRecoveredPassword();
+    }
+}
 
-    return true;
+bool Bank::isTheSameEmail() {
+    return this->email == this->accountsData[this->numId]["email"];
+}
+
+void Bank::showRecoveredPassword() {
+    cout << this->accountsData[this->numId]["pass"] << '\n';
 }
 
 void Bank::addAccountToDatabase() const {
@@ -253,27 +284,37 @@ void Bank::addAccountToDatabase() const {
     }
 
     tempDatabaseFile << this->id << ';' << this->email << ';' << this->userName
-        << ';' << this->userSurname << ';' << this->password << '\n';
+        << ';' << this->userSurname << ';' << this->password << ";" << "0" << '\n';
 
     fs::remove(this->databaseFilePath);
     fs::rename(this->tempDb, this->databaseFilePath);
 }
 
-void Bank::resetClassInfo() {
-    this->id = "";
-    this->userName = "";
-    this->userSurname = "";
-    this->password = "";
-    this->email = "";
+void Bank::addAccountToVariable() {
+    this->accountsData[this->numId]["id"] = this->id;
+    this->accountsData[this->numId]["email"] = this->email;
+    this->accountsData[this->numId]["name"] = this->userName;
+    this->accountsData[this->numId]["surname"] = this->userSurname;
+    this->accountsData[this->numId]["pass"] = this->password;
+    this->accountsData[this->numId]["balance"] = "0";
 }
 
 void Bank::accountCreated() {
     cout << this->blueColor << this->accSuccCreatedMess << this->colorReset << '\n';
     cout << "Your account details: " << '\n';
-    cout << "\tId and your login: " << this->id << '\n';
+    cout << "\tId and your login: " << this->numId << '\n';
     cout << "\tName: " << this->userName << '\n';
     cout << "\tSurname: " << this->userSurname << '\n';
     cout << "\tEmail: " << this->email << '\n';
 
     this->resetClassInfo();
+}
+
+void Bank::resetClassInfo() {
+    this->numId = 0;
+    this->id = "";
+    this->userName = "";
+    this->userSurname = "";
+    this->password = "";
+    this->email = "";
 }
