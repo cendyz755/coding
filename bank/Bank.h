@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include "Account.h"
+
 using std::map;
 using std::string;
 using std::vector;
@@ -14,8 +16,12 @@ using std::regex;
 using std::regex_match;
 using std::all_of;
 
-class Bank {
+class Bank : protected Account {
 private:
+    Account acc;
+    void grabAccData();
+    [[nodiscard]] Account sendInfoToAccClass() const;
+
     string redColor{"\033[91m"};
     string blueColor{"\033[94m"};
     string colorReset{"\033[0m"};
@@ -31,7 +37,7 @@ private:
     string databaseFilePath{"database.csv"};
     void isAccountsDatabaseExists();
 
-    regex menuOptRegex{R"(^[1-3]$)"};
+    regex menuOptRegex{R"(^[1-4]$)"};
     string userOption;
     string tempUserOption;
     string wrongOptionMessage{"Wrong option. "};
@@ -102,6 +108,7 @@ private:
 
     void login();
 
+    string balance;
     string idMess{"Your id: "};
     string passMess{"Your pass: "};
     string wrongLoginPassMess{"Wrong login or password."};
@@ -111,8 +118,12 @@ private:
     void loginInId();
     bool idAndPassInDatabase();
 
+    void updateAccount();
+    void updateDatabaseFile() const;
+
 public:
     Bank();
+    ~Bank();
 };
 
 #endif //BANK_BANK_H

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include "Account.h"
 using std::cin;
 using std::cout;
 using std::getline;
@@ -13,7 +15,7 @@ using std::ofstream;
 using std::stringstream;
 namespace fs = std::filesystem;
 
-Bank::Bank() {
+Bank::Bank() : Account() {
     this->isAccountsDatabaseExists();
 
     cout << this->welcomeMessage << '\n';
@@ -21,6 +23,8 @@ Bank::Bank() {
 
     this->selectingStartOption();
 }
+
+Bank::~Bank() = default;
 
 void Bank::showMenu() const {
     for (int i{1}; i <= this->startOptions.size(); ++i) {
@@ -79,15 +83,18 @@ bool Bank::validateUserOption() {
 }
 
 void Bank::executeSelectedOption() {
-    if (this->userOption == "1") {
+    if (this->userOption == "1")
         this->login();
-        return;
-    }
-    else if (this->userOption == "2") {
+
+    if (this->userOption == "2")
         this->registerAccount();
-    }
-    else if (this->userOption == "3") {
+    if (this->userOption == "3")
         this->recoveringPassword();
+
+    if (this->userOption == "4") {
+        this->updateDatabaseFile();
+        cout << "Bye." << '\n';
+        return;
     }
 
     this->showMenu();
@@ -96,6 +103,13 @@ void Bank::executeSelectedOption() {
 
 void Bank::login() {
     this->loginInId();
+    this->grabAccData();
+    this->acc = this->sendInfoToAccClass();
+    this->acc.showAccInfo();
+    this->acc.showMenu();
+    this->updateAccount();
+    this->addAccountToDatabase();
+    // this->resetClassInfo();
 }
 
 void Bank::loginInId() {
@@ -106,7 +120,7 @@ void Bank::loginInId() {
     getline(cin, this->password);
 
     if (!this->idAndPassInDatabase()) {
-        cout << this->redColor << this->wrongEmailMess << this->colorReset << '\n';
+        cout << this->redColor << this->wrongLoginPassMess << this->colorReset << '\n';
         this->loginInId();
     }
     else {
@@ -127,6 +141,25 @@ bool Bank::idAndPassInDatabase() {
         return false;
 
     return true;
+}
+
+void Bank::grabAccData() {
+    const int digitId{stoi(this->id)};
+
+    this->id = this->accountsData[digitId]["id"];
+    this->userName = this->userName = this->accountsData[digitId]["name"];
+    this->userSurname = this->accountsData[digitId]["surname"];
+    this->email = this->accountsData[digitId]["email"];
+    this->balance = this->accountsData[digitId]["balance"];
+}
+
+Account Bank::sendInfoToAccClass() const {
+    Account loginAcc{
+        this->id, this->userName, this->userSurname, this->email,
+        stoi(this->balance)
+    };
+
+    return loginAcc;
 }
 
 void Bank::registerAccount() {
@@ -317,4 +350,15 @@ void Bank::resetClassInfo() {
     this->userSurname = "";
     this->password = "";
     this->email = "";
+}
+
+void Bank::updateAccount() {
+    string t{std::to_string(acc.balance)};
+
+    this->accountsData[this->numId]["email"] = acc.email;
+    this->accountsData[this->numId]["pass"] = acc.password;
+    this->accountsData[this->numId]["balance"] = t;
+}
+
+void Bank::updateDatabaseFile() const {
 }

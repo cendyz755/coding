@@ -6,4 +6,6 @@ set(CMAKE_CXX_STANDARD 23)
 add_executable(Bank.cpp
         Bank.h
         main.cpp
-        Bank.cpp)
+        Bank.cpp
+        Account.cpp
+        Account.h)
