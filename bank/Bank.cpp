@@ -15,7 +15,7 @@ using std::ofstream;
 using std::stringstream;
 namespace fs = std::filesystem;
 
-Bank::Bank() : Account() {
+Bank::Bank() {
     this->isAccountsDatabaseExists();
 
     cout << this->welcomeMessage << '\n';
@@ -106,7 +106,7 @@ void Bank::login() {
     this->acc.showMenu();
     this->updateAccount();
     this->addAccountToDatabase();
-    // this->resetClassInfo();
+    this->resetClassInfo();
 }
 
 void Bank::loginInId() {
@@ -154,7 +154,7 @@ void Bank::grabAccData() {
 Account Bank::sendInfoToAccClass() const {
     Account loginAcc{
         this->id, this->userName, this->userSurname,
-        this->email, this->password, stoi(this->balance)
+        this->email, this->password, stod(this->balance)
     };
 
     return loginAcc;
@@ -298,7 +298,8 @@ bool Bank::isTheSameEmail() {
 }
 
 void Bank::showRecoveredPassword() {
-    cout << this->accountsData[this->numId][4] << '\n';
+    cout << this->redColor << this->forgottenPassMess << this->colorReset << ": " << this->
+        accountsData[this->numId][4] << '\n';
 }
 
 void Bank::addAccountToDatabase() const {
@@ -328,11 +329,11 @@ void Bank::addAccountToVariable() {
 
 void Bank::accountCreated() {
     cout << this->blueColor << this->accSuccCreatedMess << this->colorReset << '\n';
-    cout << "Your account details: " << '\n';
-    cout << "\tId and your login: " << this->numId << '\n';
-    cout << "\tName: " << this->userName << '\n';
-    cout << "\tSurname: " << this->userSurname << '\n';
-    cout << "\tEmail: " << this->email << '\n';
+
+    for (int i{}; i < this->newAccDetailsMess.size(); ++i) {
+        cout << '\t' << this->blueColor << this->newAccDetailsMess[i] <<
+            this->colorReset << ": " << this->accountsData[this->numId][i] << '\n';
+    }
 
     this->resetClassInfo();
 }
@@ -348,9 +349,6 @@ void Bank::resetClassInfo() {
 
 void Bank::updateAccount() {
     const string newBalance{std::to_string(acc.balance)};
-    cout << "balans po konwercie " << newBalance << '\n';
-    cout << "a to jest num id: " << this->numId << '\n';
-    cout << "a to jest zwykły id: " << this->id << '\n';
 
     this->accountsData[this->numId][1] = acc.email;
     this->accountsData[this->numId][4] = acc.password;
@@ -360,13 +358,13 @@ void Bank::updateAccount() {
 void Bank::updateDatabaseFile() const {
     ofstream tempDbFile{this->tempDb};
     string accountDetails;
-    for (auto& acc : this->accountsData) {
-        for (int i{}; i < acc.second.size(); ++i) {
-            if (i == acc.second.size() - 1) {
-                tempDbFile << acc.second[i] << '\n';
+    for (const auto& val : this->accountsData | std::views::values) {
+        for (int i{}; i < val.size(); ++i) {
+            if (i == val.size() - 1) {
+                tempDbFile << val[i] << '\n';
             }
             else {
-                tempDbFile << acc.second[i] << ';';
+                tempDbFile << val[i] << ';';
             }
         }
     }

@@ -5,10 +5,10 @@
 #include <regex>
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include "Account.h"
 
-using std::map;
+using std::unordered_map;
 using std::string;
 using std::vector;
 using std::regex;
@@ -27,7 +27,7 @@ private:
     string welcomeMessage{"Welcome to the bank!"};
     vector<string> startOptions{"Login", "Register", "Recover password", "Exit"};
     vector<string> accInfo{"id", "email", "name", "surname", "pass", "balance"};
-    map<int, vector<string>> accountsData;
+    unordered_map<int, vector<string>> accountsData;
 
     void loadDataToFile();
     void insertDataToVariable(const string& accountData);
@@ -92,6 +92,7 @@ private:
     [[nodiscard]] bool validateEmail() const;
     [[nodiscard]] bool emailAlreadyExists() const;
 
+    string forgottenPassMess{"Your forgotten password"};
     string wrongEmailIdMess{"Wrong email or id"};
     void recoveringPassword();
     void showRecoveredPassword();
@@ -101,6 +102,7 @@ private:
     void addAccountToDatabase() const;
     void addAccountToVariable();
 
+    vector<string> newAccDetailsMess{"Id and your login", "Name", "Surname", "E-mail"};
     string accSuccCreatedMess{"Account created successfully!"};
     string newAccInfoMess{"Your new account details: "};
     void accountCreated();

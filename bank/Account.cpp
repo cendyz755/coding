@@ -1,7 +1,3 @@
-//
-// Created by cendyz775 on 2026/02/23.
-//
-
 #include "Account.h"
 #include <iostream>
 
@@ -13,28 +9,31 @@ Account::Account() = default;
 Account::~Account() = default;
 
 void Account::showAccInfo() const {
-    cout << "Your account details" << '\n';
-    cout << '\t' << "Id: " << this->id << '\n';
-    cout << '\t' << "Name: " << this->name << '\n';
-    cout << '\t' << "Surname: " << this->surname << '\n';
-    cout << '\t' << "Email: " << this->email << '\n';
-    cout << '\t' << "Balance: " << this->balance << '\n';
+    cout << this->newAccInfoMess << '\n';
+
+    for (int i{}; i < this->newAccVars.size() - 1; ++i) {
+        cout << '\t' << this->blueColor << this->newAccDetailsMess[i] << this->colorReset << ": " <<
+            this->newAccVars[i] << '\n';
+    }
+
+    cout << '\t' << this->blueColor << this->newAccDetailsMess[4] << this->colorReset << ": " <<
+        std::fixed << std::setprecision(2) << this->balance << '\n';
 }
 
 void Account::showMenu() {
-    cout << "Your account options:" << '\n';
+    cout << this->accOptsMess << '\n';
     for (int i{1}; i <= this->loggedMenu.size(); ++i) {
         cout << '\t' << i << ". " << this->loggedMenu[i - 1] << '\n';
     }
 
-    cout << "What you want to do?: ";
+    cout << this->whatToDoMess;
 
     this->selectingLoggedOptions();
 }
 
 void Account::selectingLoggedOptions() {
     if (!this->validateSelectedOption()) {
-        cout << "Wrong number option." << '\n';
+        cout << this->wrongOptMess << '\n';
         this->selectingLoggedOptions();
     }
     else {
@@ -71,55 +70,56 @@ void Account::executeOption() {
 }
 
 void Account::withdrawFunc() {
-    cout << "How much do you want to withdraw?: ";
+    cout << this->howMuchWithdrawMess;
     getline(cin, this->money);
 
     if (!this->validateWithdrawDepositMoney()) {
+        cout << this->redColor << this->wrongNumMoneyMess << this->colorReset << '\n';
         this->withdrawFunc();
         return;
     }
 
-    if (stoi(this->money) > this->balance) {
-        cout << "You can't withdraw more money than you have." << '\n';
+    const double newMoney{stod(this->money)};
+
+    if (newMoney > this->balance) {
+        cout << this->redColor << this->errWithdrawMess << this->colorReset
+            << '\n';
         this->withdrawFunc();
         return;
     }
 
-    balance -= stoi(this->money);
-    cout << "Your current balance: " << this->balance << '\n';
+    balance -= newMoney;
+    cout << this->blueColor << this->currBalanceMess << this->colorReset << ": " << this->balance
+        << '\n';
 }
 
-bool Account::validateWithdrawDepositMoney() {
-    const bool isCorrectAmount(std::all_of(money.begin(), this->money.end(),
-                                           [](const char& c) { return isdigit(c); }));
-
-    if (!isCorrectAmount) {
-        cout << "This is not a number." << '\n';
-        return false;
-    }
-
-    return true;
+bool Account::validateWithdrawDepositMoney() const {
+    return std::regex_match(this->money, this->isThisDouble);
 }
 
 void Account::depositFunc() {
-    cout << "How much do you want to deposit?: ";
+    cout << this->depositMess;
     getline(cin, this->money);
 
     if (!this->validateWithdrawDepositMoney()) {
+        cout << this->redColor << this->wrongNumMoneyMess << this->colorReset << '\n';
         this->withdrawFunc();
         return;
     }
 
-    if (stoi(this->money) < 0) {
-        cout << "You can't deposit negative or zero money." << '\n';
+    const double newMoney{stod(this->money)};
+
+    if (newMoney < 0) {
+        cout << this->wrongDepositMess << '\n';
         this->withdrawFunc();
         return;
     }
 
-    balance += stoi(this->money);
-    cout << "Your current balance: " << this->balance << '\n';;
+    balance += newMoney;
+    cout << this->blueColor << this->currBalanceMess << this->colorReset << ": " << this->balance
+        << '\n';
 }
 
 void Account::checkBalance() const {
-    cout << "Your current balance is: " << this->balance << '\n';
+    cout << this->currBalanceMess << this->balance << '\n';
 }

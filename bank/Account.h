@@ -3,6 +3,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <regex>
+#include <iomanip>
+using std::regex;
 using std::string;
 using std::vector;
 
@@ -13,17 +16,17 @@ class Account {
 public:
     Account();
 
-    Account(string id, string name, string surname, string email, string pass,
-            const int bal) : id(std::move(id)), name(std::move(name)),
-                             surname(std::move(surname)), email(std::move(email)),
-                             password(std::move(pass)), balance(bal) {
+    Account(string id, string email, string name, string surname, string pass,
+            const double bal) : id(std::move(id)), email(std::move(email)), name(std::move(name)),
+                                surname(std::move(surname)), password(std::move(pass)),
+                                balance(bal) {
     };
     ~Account();
 
     string id;
+    string email;
     string name;
     string surname;
-    string email;
     string password;
     double balance{};;
 
@@ -36,6 +39,17 @@ public:
     void showMenu();
 
 private:
+    string redColor{"\033[91m"};
+    string blueColor{"\033[94m"};
+    string colorReset{"\033[0m"};
+
+    string newAccInfoMess{"Your account details:"};
+    vector<string> newAccDetailsMess{"Id", "Name", "Surname", "E-mail", "Balance"};
+    vector<string> newAccVars{this->id, this->name, this->surname, this->email};
+
+    string wrongOptMess{"Wrong number option."};
+    string accOptsMess{"Your account options:"};
+    string whatToDoMess{"What you want to do?: "};
     int unixZero{48};
     string selectedOption;
     void selectingLoggedOptions();
@@ -43,10 +57,17 @@ private:
 
     void executeOption();
 
+    string wrongNumMoneyMess{"This is not correct value."};
+    string currBalanceMess{"Your current balance"};
+    string errWithdrawMess{"You can't withdraw more money than you have."};
+    string howMuchWithdrawMess{"How much do you want to withdraw?: "};
+    string depositMess{"How much do you want to deposit?: "};
+    string wrongDepositMess{"You can't deposit negative or zero money."};
+    regex isThisDouble{R"(^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$)"};
     string money;
     void withdrawFunc();
     void depositFunc();
-    bool validateWithdrawDepositMoney();
+    [[nodiscard]] bool validateWithdrawDepositMoney() const;
 
     void checkBalance() const;
 };
