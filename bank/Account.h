@@ -13,10 +13,10 @@ class Account {
 public:
     Account();
 
-    Account(string id, string name, string surname, string email,
+    Account(string id, string name, string surname, string email, string pass,
             const int bal) : id(std::move(id)), name(std::move(name)),
-                             surname(std::move(surname)),
-                             email(std::move(email)), balance(bal) {
+                             surname(std::move(surname)), email(std::move(email)),
+                             password(std::move(pass)), balance(bal) {
     };
     ~Account();
 

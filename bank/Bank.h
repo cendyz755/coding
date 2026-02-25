@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <unordered_map>
 #include "Account.h"
 
 using std::map;
@@ -28,7 +27,8 @@ private:
     string welcomeMessage{"Welcome to the bank!"};
     vector<string> startOptions{"Login", "Register", "Recover password", "Exit"};
     vector<string> accInfo{"id", "email", "name", "surname", "pass", "balance"};
-    map<int, std::unordered_map<string, string>> accountsData;
+    map<int, vector<string>> accountsData;
+
     void loadDataToFile();
     void insertDataToVariable(const string& accountData);
     void selectingStartOption();

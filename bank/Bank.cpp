@@ -63,11 +63,8 @@ void Bank::insertDataToVariable(const string& accountData) {
     string cell;
     const int userId{stoi(accountData.substr(0, 8))};
 
-    int field{};
-
     while (getline(ss, cell, ';')) {
-        this->accountsData[userId][this->accInfo[field]] = cell;
-        ++field;
+        this->accountsData[userId].push_back(cell);
     }
 }
 
@@ -137,26 +134,27 @@ bool Bank::idAndPassInDatabase() {
     if (!this->accountsData.contains(idToNum))
         return false;
 
-    if (this->accountsData[idToNum]["pass"] != this->password)
+    if (this->accountsData[idToNum][4] != this->password)
         return false;
 
     return true;
 }
 
 void Bank::grabAccData() {
-    const int digitId{stoi(this->id)};
+    this->numId = stoi(this->id);
 
-    this->id = this->accountsData[digitId]["id"];
-    this->userName = this->userName = this->accountsData[digitId]["name"];
-    this->userSurname = this->accountsData[digitId]["surname"];
-    this->email = this->accountsData[digitId]["email"];
-    this->balance = this->accountsData[digitId]["balance"];
+    this->id = this->accountsData[this->numId][0];
+    this->userName = this->userName = this->accountsData[this->numId][1];
+    this->userSurname = this->accountsData[this->numId][2];
+    this->email = this->accountsData[this->numId][3];
+    this->password = this->accountsData[this->numId][4];
+    this->balance = this->accountsData[this->numId][5];
 }
 
 Account Bank::sendInfoToAccClass() const {
     Account loginAcc{
-        this->id, this->userName, this->userSurname, this->email,
-        stoi(this->balance)
+        this->id, this->userName, this->userSurname,
+        this->email, this->password, stoi(this->balance)
     };
 
     return loginAcc;
@@ -274,13 +272,9 @@ bool Bank::validateEmail() const {
 }
 
 bool Bank::emailAlreadyExists() const {
-    return all_of(this->accountsData.begin(), this->accountsData.end(),
-                  [this](const auto& pair) {
-                      const auto& acc{pair.second};
-                      auto it{acc.find("email")};
-
-                      return it->second != this->email;
-                  });
+    return all_of(this->accountsData.begin(), this->accountsData.end(), [this](auto& pair) {
+        return pair.second[1] != this->email;
+    });
 }
 
 void Bank::recoveringPassword() {
@@ -300,11 +294,11 @@ void Bank::recoveringPassword() {
 }
 
 bool Bank::isTheSameEmail() {
-    return this->email == this->accountsData[this->numId]["email"];
+    return this->email == this->accountsData[this->numId][1];
 }
 
 void Bank::showRecoveredPassword() {
-    cout << this->accountsData[this->numId]["pass"] << '\n';
+    cout << this->accountsData[this->numId][4] << '\n';
 }
 
 void Bank::addAccountToDatabase() const {
@@ -324,12 +318,12 @@ void Bank::addAccountToDatabase() const {
 }
 
 void Bank::addAccountToVariable() {
-    this->accountsData[this->numId]["id"] = this->id;
-    this->accountsData[this->numId]["email"] = this->email;
-    this->accountsData[this->numId]["name"] = this->userName;
-    this->accountsData[this->numId]["surname"] = this->userSurname;
-    this->accountsData[this->numId]["pass"] = this->password;
-    this->accountsData[this->numId]["balance"] = "0";
+    this->accountsData[this->numId].push_back(this->id);
+    this->accountsData[this->numId].push_back(this->email);
+    this->accountsData[this->numId].push_back(this->userName);
+    this->accountsData[this->numId].push_back(this->userSurname);
+    this->accountsData[this->numId].push_back(this->password);
+    this->accountsData[this->numId].emplace_back("0");
 }
 
 void Bank::accountCreated() {
@@ -353,12 +347,30 @@ void Bank::resetClassInfo() {
 }
 
 void Bank::updateAccount() {
-    string t{std::to_string(acc.balance)};
+    const string newBalance{std::to_string(acc.balance)};
+    cout << "balans po konwercie " << newBalance << '\n';
+    cout << "a to jest num id: " << this->numId << '\n';
+    cout << "a to jest zwykły id: " << this->id << '\n';
 
-    this->accountsData[this->numId]["email"] = acc.email;
-    this->accountsData[this->numId]["pass"] = acc.password;
-    this->accountsData[this->numId]["balance"] = t;
+    this->accountsData[this->numId][1] = acc.email;
+    this->accountsData[this->numId][4] = acc.password;
+    this->accountsData[this->numId][5] = newBalance;
 }
 
 void Bank::updateDatabaseFile() const {
+    ofstream tempDbFile{this->tempDb};
+    string accountDetails;
+    for (auto& acc : this->accountsData) {
+        for (int i{}; i < acc.second.size(); ++i) {
+            if (i == acc.second.size() - 1) {
+                tempDbFile << acc.second[i] << '\n';
+            }
+            else {
+                tempDbFile << acc.second[i] << ';';
+            }
+        }
+    }
+
+    fs::remove(this->databaseFilePath);
+    fs::rename(this->tempDb, this->databaseFilePath);
 }
