@@ -15,7 +15,7 @@ using std::regex;
 using std::regex_match;
 using std::all_of;
 
-class Bank : protected Account {
+class Bank {
 private:
     Account acc;
     void grabAccData();

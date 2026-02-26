@@ -35,6 +35,7 @@ void Bank::showMenu() const {
 void Bank::isAccountsDatabaseExists() {
     if (const fs::path databasePath(this->databaseFilePath); !fs::exists(databasePath)) {
         ofstream database(this->databaseFilePath);
+        database.close();
     }
     else {
         this->loadDataToFile();
@@ -316,6 +317,8 @@ void Bank::addAccountToDatabase() const {
 
     fs::remove(this->databaseFilePath);
     fs::rename(this->tempDb, this->databaseFilePath);
+
+    tempDatabaseFile.close();
 }
 
 void Bank::addAccountToVariable() {
@@ -371,4 +374,6 @@ void Bank::updateDatabaseFile() const {
 
     fs::remove(this->databaseFilePath);
     fs::rename(this->tempDb, this->databaseFilePath);
+
+    tempDbFile.close();
 }

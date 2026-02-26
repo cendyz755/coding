@@ -1,5 +1,6 @@
 #include "Account.h"
 #include <iostream>
+#include <fstream>
 
 using std::cout;
 using std::cin;
@@ -63,6 +64,12 @@ void Account::executeOption() {
     if (this->selectedOption == "3")
         this->checkBalance();
 
+    if (this->selectedOption == "4")
+        this->changeEmail();
+
+    if (this->selectedOption == "5")
+        this->changePass();
+
     if (this->selectedOption == "6")
         return;
 
@@ -122,4 +129,49 @@ void Account::depositFunc() {
 
 void Account::checkBalance() const {
     cout << this->currBalanceMess << this->balance << '\n';
+}
+
+void Account::changeEmail() {
+    cout << "Your new email: ";
+    getline(cin, this->email);
+
+    if (this->emailAlreadyExists() || !this->itsCorrectEmail()) {
+        cout << "This email already exists or it is not a at all email." << '\n';
+        this->changeEmail();
+    }
+    else {
+        cout << "Email changed." << '\n';
+    }
+}
+
+bool Account::emailAlreadyExists() const {
+    std::ifstream dbFile{this->databaseFilePath};
+    string accDetails;
+
+    while (getline(dbFile, accDetails)) {
+        if (accDetails.find(this->email) != string::npos) return true;
+    }
+
+    return false;
+}
+
+bool Account::itsCorrectEmail() const {
+    return std::regex_match(this->email, this->emailRegex);
+}
+
+void Account::changePass() {
+    cout << "Your new password: ";
+    getline(cin, this->password);
+
+    if (!this->isAstrongPass()) {
+        cout << "Your password is to weak.";
+        this->changePass();
+    }
+    else {
+        cout << "Password changed successfully." << '\n';
+    }
+}
+
+bool Account::isAstrongPass() {
+    return std::regex_match(this->password, this->passRegex);
 }

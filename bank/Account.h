@@ -70,6 +70,17 @@ private:
     [[nodiscard]] bool validateWithdrawDepositMoney() const;
 
     void checkBalance() const;
+    regex emailRegex{
+        R"(^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$)"
+    };
+    string databaseFilePath{"database.csv"};
+    void changeEmail();
+    [[nodiscard]] bool emailAlreadyExists() const;
+    [[nodiscard]] bool itsCorrectEmail() const;
+
+    regex passRegex{R"(^[a-zA-Z0-9!@#$%^&*]{7,16}$)"};
+    void changePass();
+    bool isAstrongPass();
 };
 
 #endif //BANK_ACCOUNT_H
