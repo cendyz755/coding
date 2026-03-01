@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1772396432 source:/home/cendyz775/Desktop/coding/library/main.cpp
+	"Library.h"
+
+1772396312 source:/home/cendyz775/Desktop/coding/library/src/Library.cpp
+	"Library.h"
+	<iostream>
+	<algorithm>
+	<cctype>
+
+1772396311 /home/cendyz775/Desktop/coding/library/include/Library.h
+	<string>
+	<iostream>
+	<vector>
+	<regex>
+	<unordered_map>
+
