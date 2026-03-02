@@ -1,9 +1,8 @@
 #include "Library.h"
-
+#include "Bookshelves.h"
 using namespace std;
 
-int main()
-{
+int main() {
     Library library;
 
     while (true) {
@@ -11,11 +10,9 @@ int main()
 
         library.execute_choice();
 
-        if(library.person_want_leave)
+        if (library.person_want_leave)
             return 1;
-
     }
-
 
     return 0;
 }

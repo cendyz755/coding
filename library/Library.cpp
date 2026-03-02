@@ -1,7 +1,6 @@
 #include "Library.h"
 
 #include <iostream>
-#include <algorithm>
 #include <cctype>
 using std::cin;
 using std::cout;
@@ -13,6 +12,8 @@ Library::Library() {
     for (string &mess : this->welcome_mess) {
         cout << mess << '\n';
     }
+
+    // Library::show_books();
 }
 
 Library::~Library() = default;
@@ -51,4 +52,3 @@ void Library::leave() {
 
     this->person_want_leave = true;
 }
-
