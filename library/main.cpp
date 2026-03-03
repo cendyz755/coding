@@ -8,10 +8,12 @@ int main() {
     while (true) {
         library.person_choosing_what_to_do();
 
-        library.execute_choice();
-
-        if (library.person_want_leave)
+        if (library.selected_option[library.person_choice] == 4) {
+            library.register_card();
+        }else if (library.selected_option[library.person_choice] == 7) {
+            cout << "Bye." << '\n';
             return 1;
+        }
     }
 
     return 0;
