@@ -8,7 +8,7 @@ add_executable(library main.cpp
         Library.h
         Bookshelves.cpp
         Bookshelves.h
-        Person.cpp
-        Person.h
+        Registered_people.cpp
+        Registered_people.h
         Employee.cpp
         Employee.h)

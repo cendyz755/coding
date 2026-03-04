@@ -5,13 +5,13 @@
 #ifndef LIBRARY_EMPLOYEE_H
 #define LIBRARY_EMPLOYEE_H
 
-#include "Person.h"
+#include "Registered_people.h"
 #include <vector>
 #include <string>
 using std::unordered_map;
 using std::string;
 
-class Employee : protected Person{
+class Employee : protected Registered_people{
 protected:
     // unordered_map<int, vector<string>> employees;
 

@@ -1,8 +1,12 @@
 #include "Library.h"
+#include "Registered_people.h"
 #include "Bookshelves.h"
+#include <iostream>
 using namespace std;
 
 int main() {
+    Registered_people registered_people;
+    // registered_people.show_infos();
     Library library;
 
     while (true) {
