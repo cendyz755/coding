@@ -11,15 +11,14 @@ using std::cout;
 using std::isspace;
 using std::regex_match;
 
-Library::Library() {
-  for (string &mess : this->welcome_mess) {
-    cout << mess << '\n';
-  }
-}
+Library::Library() { cout << "Welcome to the library!" << '\n'; }
 
 Library::~Library() = default;
 
 void Library::person_choosing_what_to_do() {
+  for (string &mess : this->welcome_mess) {
+    cout << mess << '\n';
+  }
   cout << "Your choice: ";
 
   while (true) {
@@ -47,11 +46,15 @@ void Library::register_card() {
     cout << "Your date is wrong.\n";
     this->register_card();
   } else {
+    this->generate_card_id();
     this->validate_new_card_id();
     this->person_all_info = {this->id, this->name, this->surname,
                              this->birthdate};
-    this->add_card_to_file_and_var();
+    this->add_card_to_file();
+    this->add_card_to_var();
     cout << "Card registered successfully\n";
+    cout << "This is your new card number: " << this->id << '\n';
+    this->reset_person_info();
   }
 }
 
@@ -77,7 +80,7 @@ bool Library::validate_birthdate() {
 }
 
 void Library::validate_new_card_id() {
-  if (this->id[0] == 0 || !this->is_new_id_card_exists()) {
+  if (this->id[0] == '0' || this->is_new_id_card_exists()) {
     this->generate_card_id();
   }
 }
@@ -95,12 +98,12 @@ void Library::generate_card_id() {
 
 bool Library::is_new_id_card_exists() const {
   if (this->normal_person.contains(this->id))
-    return false;
+    return true;
 
-  return true;
+  return false;
 }
 
-void Library::add_card_to_file_and_var() {
+void Library::add_card_to_file() {
   std::ifstream database_file(this->database_path);
   std::ofstream temp_db{"temp.csv"};
   string file_person_info;
@@ -125,4 +128,77 @@ void Library::add_card_to_file_and_var() {
 
   fs::remove(this->database_path);
   fs::rename("temp.csv", this->database_path);
+}
+
+void Library::add_card_to_var() {
+  this->normal_person[this->id] = {this->id, this->name, this->surname,
+                                   this->birthdate};
+}
+
+void Library::reset_person_info() {
+  this->id = "";
+  this->name = "";
+  this->surname = "";
+  this->birthdate = "";
+}
+
+void Library::validate_card() {
+  this->show_infos();
+  while (true) {
+    cout << "Your card number: ";
+    getline(cin, this->checked_in_person_card);
+
+    if (this->normal_person.contains(this->checked_in_person_card))
+      return;
+
+    cout << "Wrong card number!" << '\n';
+  }
+}
+
+void Library::show_registered_menu() {
+  cout << "Your books status:" << '\n';
+  if (!this->borrowed_books.contains(this->id)) {
+    cout << "You have not borrowed any book!" << '\n';
+    cout << "You can borrow book of type you want or back to the main menu"
+         << '\n';
+    cout << "(borrow, back)" << '\n';
+    getline(cin, this->person_choice);
+    if (this->person_choice == "back") {
+      cout << "Returning to main menu..." << '\n';
+    } else if (this->person_choice == "borrow") {
+      this->choosing_book_genre();
+    }
+  } else {
+    cout << "Your borrowed books:" << '\n';
+    for (string &book : this->borrowed_books[this->id]) {
+      cout << book << '\n';
+    }
+  }
+}
+void Library::choosing_book_genre() {
+  cout << "Which type of book do you want to borrow?" << '\n';
+  cout << "(romance, fantasy, thriller, horror)" << '\n';
+
+  while (true) {
+    getline(cin, this->selected_genre);
+    if (!this->validate_genre()) {
+      cout << "Wrong genre. Try again: ";
+    } else {
+      break;
+    }
+  }
+
+  this->select_book();
+}
+
+bool Library::validate_genre() const {
+  return regex_match(this->selected_genre, this->genre_regex);
+}
+
+void Library::select_book() {
+  cout << "All books in the " << this->selected_genre << " genre:" << '\n';
+  // cout << this->books_by_genre[this->selected_genre].size() << '\n';
+  for (string &book : this->books_by_genre[this->selected_genre]) {
+    cout << book << '\n';
+  }
 }

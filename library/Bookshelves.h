@@ -2,34 +2,38 @@
 #define BOOKSHELFS_H
 
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
-using std::string;
-using std::vector;
 using std::map;
+using std::string;
 using std::unordered_map;
+using std::vector;
 
 class Bookshelves {
 public:
-    Bookshelves();
-    virtual ~Bookshelves();
+  Bookshelves();
+  virtual ~Bookshelves();
 
 protected:
-    map<int, vector<vector<string>>> books;
-    void show_books();
+  map<string, vector<string>> books;
+  unordered_map<string, vector<string>> books_by_genre;
+  void show_books();
+
+  unordered_map<string, vector<string>> borrowed_books;
 
 private:
-    const string bookshelf_file_type{".csv"};
-    unsigned short bookshelf_num{1};
-    const string books_path{"books/bookshelf"};
-    string current_bookshelf;
-    void load_books_to_variable();
-    [[nodiscard]] bool is_bookshelf_exist();
-    [[nodiscard]] string update_bookshelf_path();
-    void reading_bookshelf();
-    void checking_book(const string &);
+  const string bookshelf_file_type{".csv"};
+  unsigned short bookshelf_num{1};
+  const string books_path{"books/bookshelf"};
+  string current_bookshelf;
+  void load_books_to_variable();
+  [[nodiscard]] bool is_bookshelf_exist();
+  [[nodiscard]] string update_bookshelf_path();
+  void reading_bookshelf();
+  void checking_book(const string &);
 
+  void add_book_to_correct_genre(const vector<string> &book);
 };
 
 #endif // BOOKSHELFS_H

@@ -14,7 +14,6 @@ namespace fs = std::filesystem;
 
 Registered_people::Registered_people() {
   this->is_database_file_exists();
-  // this->show_infos();
 };
 
 Registered_people::~Registered_people() = default;
@@ -56,15 +55,15 @@ void Registered_people::add_person_info_to_var(const string &person_info) {
   }
 
   if (std::isdigit(person_or_employee[0])) {
-    this->employee[person_or_employee] = all_person_info;
-  } else {
     this->normal_person[person_or_employee] = all_person_info;
+  } else {
+    this->employee[person_or_employee] = all_person_info;
   }
 }
 
 void Registered_people::show_infos() {
   for (auto &[person, info] : this->employee) {
-    cout << "Employee info: ";
+    cout << person << " employee info: ";
     for (string &s : info) {
       cout << s << " ";
     }
@@ -74,7 +73,7 @@ void Registered_people::show_infos() {
   cout << "~~~~~~~~" << '\n';
 
   for (auto &[person, info] : this->normal_person) {
-    cout << "Normal person info: ";
+    cout << person << "Normal person info: ";
     for (string &s : info) {
       cout << s << " ";
     }

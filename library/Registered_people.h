@@ -17,8 +17,7 @@ protected:
   string database_path{"registered_people.csv"};
   unordered_map<string, vector<string>> normal_person;
   unordered_map<string, vector<string>> employee;
-  vector<string> employees_id;
-  vector<string> persons_card_number;
+
 
 public:
   Registered_people();
