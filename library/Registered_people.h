@@ -14,7 +14,8 @@ using std::vector;
 
 class Registered_people {
 protected:
-  string database_path{"registered_people.csv"};
+  const string DATABASE_PATH{"registered_people.csv"};
+  const string TEMP_PEOPLE_FILE_PATH{"temp.csv"};
   unordered_map<string, vector<string>> normal_person;
   unordered_map<string, vector<string>> employee;
 

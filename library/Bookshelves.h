@@ -16,22 +16,25 @@ public:
   virtual ~Bookshelves();
 
 protected:
-  map<string, vector<string>> books;
   unordered_map<string, vector<string>> books_by_genre;
   void show_books();
 
   unordered_map<string, vector<string>> borrowed_books;
 
 private:
-  const string bookshelf_file_type{".csv"};
+  const string LOADING_BOOKS_MSG{"Loading books...\n"};
+  const string BOOKS_LOADED_MSG{"Books loaded to library.\n"};
+  map<string, vector<string>> books;
+
+  const string BOOKSHELF_FILE_TYPE{".csv"};
   unsigned short bookshelf_num{1};
-  const string books_path{"books/bookshelf"};
+  const string BOOKS_PATH{"books/bookshelf"};
   string current_bookshelf;
   void load_books_to_variable();
   [[nodiscard]] bool is_bookshelf_exist();
   [[nodiscard]] string update_bookshelf_path();
   void reading_bookshelf();
-  void checking_book(const string &);
+  void checking_book(const string & book);
 
   void add_book_to_correct_genre(const vector<string> &book);
 };

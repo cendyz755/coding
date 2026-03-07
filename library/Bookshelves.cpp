@@ -3,17 +3,26 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <print>
 #include <ranges>
 using std::cout;
 using std::ofstream;
+using std::print;
 namespace fs = std::filesystem;
 
-Bookshelves::Bookshelves() {
-  cout << "Loading books..." << '\n';
+namespace Color {
+constexpr auto RED{"\033[31m"};
+constexpr auto YELLOW{"\033[33m"};
+constexpr auto LIGHT_CYAN{"\033[1;36m"};
+constexpr auto LIGHT_GREEN{"\033[1:32m"};
+constexpr auto RESET{"\033[0m"};
+} // namespace Color
 
+Bookshelves::Bookshelves() {
+  print("{}{}{}", Color::YELLOW, this->LOADING_BOOKS_MSG, Color::RESET);
   this->load_books_to_variable();
-  this->show_books();
-  cout << "Books loaded to library." << '\n';
+  // this->show_books();
+  print("{}{}{}", Color::LIGHT_GREEN, this->BOOKS_LOADED_MSG, Color::RESET);
 }
 
 Bookshelves::~Bookshelves() = default;
@@ -26,9 +35,9 @@ void Bookshelves::load_books_to_variable() {
 }
 
 string Bookshelves::update_bookshelf_path() {
-  return this->current_bookshelf = this->books_path +
+  return this->current_bookshelf = this->BOOKS_PATH +
                                    std::to_string(this->bookshelf_num) +
-                                   this->bookshelf_file_type;
+                                   this->BOOKSHELF_FILE_TYPE;
 }
 
 bool Bookshelves::is_bookshelf_exist() {
@@ -75,8 +84,9 @@ void Bookshelves::show_books() {
 }
 
 void Bookshelves::add_book_to_correct_genre(const vector<string> &book) {
-  constexpr short int name{0};
-  constexpr short int genre{2};
-  if (constexpr short int amount{1}; book[amount] != "0")
-    this->books_by_genre[book[genre]].push_back(book[name]);
+  const string NO_BOOK{"0"};
+  constexpr short int NAME{0};
+  constexpr short int GENRE{2};
+  if (constexpr short int amount{1}; book[amount] != NO_BOOK)
+    this->books_by_genre[book[GENRE]].push_back(book[NAME]);
 }

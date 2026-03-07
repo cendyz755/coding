@@ -19,8 +19,8 @@ Registered_people::Registered_people() {
 Registered_people::~Registered_people() = default;
 
 void Registered_people::is_database_file_exists() {
-  if (!fs::exists(this->database_path)) {
-    ofstream database_file{this->database_path};
+  if (!fs::exists(this->DATABASE_PATH)) {
+    ofstream database_file{this->DATABASE_PATH};
     database_file.close();
   } else {
     this->read_database_file();
@@ -28,7 +28,7 @@ void Registered_people::is_database_file_exists() {
 }
 
 void Registered_people::read_database_file() {
-  ifstream database_file{this->database_path};
+  ifstream database_file{this->DATABASE_PATH};
   string person_info;
 
   while (getline(database_file, person_info)) {
