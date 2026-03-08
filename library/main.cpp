@@ -12,7 +12,7 @@ int main() {
       library.register_card();
     } else if (library.SELECTED_OPTION[library.person_choice] == 5) {
       library.check_card();
-      library.show_registered_menu();
+      while (library.show_registered_menu());
     } else if (library.SELECTED_OPTION[library.person_choice] == 7) {
       println("{}", library.BYE_MSG);
       return 1;

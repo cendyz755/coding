@@ -36,7 +36,7 @@ public:
   const string WRONG_CARD_NUM_MSG{"Wrong card number!"};
   const string CARD_NUMBER_MSG{"Your card number: "};
   void check_card();
-  void show_registered_menu();
+  bool show_registered_menu();
 
 private:
 
@@ -84,9 +84,7 @@ private:
                                        const regex &VALID_REGEX,
                                        const string &WRONG_INPUT_MSG);
 
-  // vector<string> PERSON_WITH_CARD_OPTIONS_MENU{"Borrow a book", "Return a
-  // book",
-  //                                              "Delete library card"};
+  const string NO_BOOKS_IN_GENRE_MSG{"All books in this genre already borrowed. Sorry!"};
   const string BACK_TO_MENU_USER_CHOICE_MSG{"back"};
   const string WRONG_MENU_INPUT_MSG{"Wrong option."};
   const string BOOK_MSG{"Your books status:"};
@@ -97,12 +95,13 @@ private:
       "your card.",
       "(borrow, back, deletecard)"};
   regex NO_BOOKS_MENU_REGEX{"borrow|back|deletecard"};
-  regex genre_regex{"fantasy|romance|thriller|horror}"};
+  regex GENRE_REGEX{"fantasy|romance|thriller|horror"};
   void show_no_books_borrowed_msg();
-  void show_no_books_borrowed_menu();
+  bool show_no_books_borrowed_menu();
   bool validate_no_books_card_menu_input();
   bool execute_no_books_menu_action() const;
 
+  string book_to_borrow;
   string selected_genre;
     const vector<string> ALL_BOOKS_IN_THE_GENRE_MSG{"All books in the ", " genre:"};
   const string WRONG_GENRE_MSG{"Wrong genre type."};
@@ -111,7 +110,11 @@ private:
   void choosing_book_genre();
   bool validate_genre();
 
-  void select_book();
+  bool select_book();
+  void choose_book_or_back();
+  bool validate_book_borrow_input();
+  bool find_book_by_user_input();
+  void borrow_book();
 };
 
 #endif // LIBRARY_H

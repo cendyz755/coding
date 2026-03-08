@@ -1,4 +1,5 @@
 #include "Library.h"
+#include <algorithm>
 #include <cctype>
 #include <filesystem>
 #include <fstream>
@@ -28,9 +29,9 @@ Library::Library() {
 Library::~Library() = default;
 
 void Library::person_choosing_what_to_do() {
-  for (string &mess : this->MENU_MSG) {
+  for (string &mess : this->MENU_MSG)
     println("{}", mess);
-  }
+
   print("{}", this->USER_CHOICE_MSG);
 
   while (!this->validate_person_choice())
@@ -39,9 +40,8 @@ void Library::person_choosing_what_to_do() {
 
 bool Library::validate_person_choice() {
   getline(cin, this->person_choice);
-  if (regex_match(this->person_choice, this->choice_regex)) {
+  if (regex_match(this->person_choice, this->choice_regex))
     return true;
-  }
 
   print("{}{}{}", Color::RED, this->WRONG_CHOICE_MESS, Color::RESET);
   return false;
@@ -49,16 +49,19 @@ bool Library::validate_person_choice() {
 
 void Library::register_card() {
   this->create_new_card_input_fields();
-  while (!this->validate_new_card_id()) {
-  }
+  while (!this->validate_new_card_id())
+    ;
   this->person_all_info = {this->id, this->name, this->surname,
                            this->birthdate};
+
   this->add_card_to_file();
   this->add_card_to_var();
+
   println("{}{}{}", Color::LIGHT_GREEN, this->CARD_REGISTERED_MSG,
           Color::RESET);
   println("{}{}{}{}", this->YOUR_ID_MSG, Color::LIGHT_GREEN, this->id,
           Color::RESET);
+
   this->reset_person_info();
 }
 
@@ -79,7 +82,7 @@ void Library::create_new_card_input_fields() {
        this->WRONG_BIRTHDATE_MSG}};
 
   for (const auto &[target, prompt, pattern, error] : fields) {
-    while (!Library::validate_new_card_fields(target, prompt, pattern, error))
+    while (!validate_new_card_fields(target, prompt, pattern, error))
       ;
   }
 }
@@ -111,9 +114,8 @@ void Library::generate_card_id() {
   std::uniform_int_distribution dist(this->CARD_NUM_RANGE[0],
                                      this->CARD_NUM_RANGE[1]);
 
-  while (this->id.size() < this->INDEX_CARD_SIZE) {
+  while (this->id.size() < this->INDEX_CARD_SIZE)
     this->id += std::to_string(dist(gen));
-  }
 }
 
 bool Library::is_new_id_card_exists() const {
@@ -175,42 +177,53 @@ void Library::check_card() {
   }
 }
 
-void Library::show_registered_menu() {
+bool Library::show_registered_menu() {
   println("{}{}{}", Color::LIGHT_CYAN, this->BOOK_MSG, Color::RESET);
   if (!this->borrowed_books.contains(this->id)) {
-    this->show_no_books_borrowed_menu();
+     if (!this->show_no_books_borrowed_menu())
+       return false;
   } else {
-    // cout << "Your borrowed books:" << '\n';
-    // for (string &book : this->borrowed_books[this->id]) {
-    //   cout << book << '\n';
-    // }
+    cout << "write 2 to stop" << '\n';
+    string c;
+    getline(cin, c);
+    if (c == "2");
+      return false;
+
   }
+  return true;
 }
 
-void Library::show_no_books_borrowed_menu() {
+bool Library::show_no_books_borrowed_menu() {
   this->show_no_books_borrowed_msg();
   while (!this->validate_no_books_card_menu_input())
     ;
-  if (this->execute_no_books_menu_action())
-    this->choosing_book_genre();
+  if (!this->execute_no_books_menu_action())
+    return false;
+
+  this->choosing_book_genre();
+
+  this->choose_book_or_back();
+
+  if (this->book_to_borrow != this->BACK_TO_MENU_USER_CHOICE_MSG)
+    this->borrow_book();
+
+  return true;
 }
 
 void Library::show_no_books_borrowed_msg() {
   for (int i{}; i < this->NOT_BORROWED_BOOKS_MSG.size(); ++i) {
-    if (i == 0) {
+    if (i == 0)
       println("{}{}{}", Color::YELLOW, this->NOT_BORROWED_BOOKS_MSG[i],
               Color::RESET);
-    } else {
+    else
       println("{}", this->NOT_BORROWED_BOOKS_MSG[i]);
-    }
   }
 }
 
 bool Library::validate_no_books_card_menu_input() {
   getline(cin, this->person_choice);
-  if (regex_match(this->person_choice, this->NO_BOOKS_MENU_REGEX)) {
+  if (regex_match(this->person_choice, this->NO_BOOKS_MENU_REGEX))
     return true;
-  }
 
   println("{}{}{}", Color::RED, this->WRONG_MENU_INPUT_MSG, Color::RESET);
   return false;
@@ -232,23 +245,58 @@ void Library::choosing_book_genre() {
 
   while (!this->validate_genre())
     ;
-  this->select_book();
+  if (!this->select_book()) {
+  };
 }
 
 bool Library::validate_genre() {
   getline(cin, this->selected_genre);
-  if (regex_match(this->selected_genre, this->genre_regex)) {
+  if (regex_match(this->selected_genre, this->GENRE_REGEX))
     return true;
-  }
 
   println("{}{}{}", Color::RED, this->WRONG_GENRE_MSG, Color::RESET);
   return false;
 }
 
-void Library::select_book() {
-  println("{}", this->ALL_BOOKS_IN_THE_GENRE_MSG[0] + this->selected_genre +
-                    this->ALL_BOOKS_IN_THE_GENRE_MSG[1]);
-  for (string &book : this->books_by_genre[this->selected_genre]) {
-    println("{}{}{}", Color::LIGHT_CYAN, book, Color::RESET);
+bool Library::select_book() {
+  if (this->books_by_genre[this->selected_genre].empty())
+    println("{}{}{}", Color::YELLOW, this->NO_BOOKS_IN_GENRE_MSG, Color::RESET);
+  else {
+    println("{}", this->ALL_BOOKS_IN_THE_GENRE_MSG[0] + this->selected_genre +
+                      this->ALL_BOOKS_IN_THE_GENRE_MSG[1]);
+    for (string &book : this->books_by_genre[this->selected_genre]) {
+      println("{}{}{}", Color::LIGHT_CYAN, book, Color::RESET);
+    }
+    return false;
   }
+  return true;
+}
+
+void Library::choose_book_or_back() {
+  println("{}", "Choose book by name as you see or back.");
+  println("{}", "(bookTitle, back)");
+
+  while (!this->validate_book_borrow_input())
+    println("{}{}{}", Color::RED, "command not found...", Color::RESET);
+}
+
+bool Library::validate_book_borrow_input() {
+  getline(cin, this->book_to_borrow);
+  if (this->book_to_borrow != this->BACK_TO_MENU_USER_CHOICE_MSG &&
+      this->find_book_by_user_input())
+    return false;
+
+  return true;
+}
+
+bool Library::find_book_by_user_input() {
+  return std::ranges::find(this->books_by_genre[this->selected_genre].begin(),
+                           this->books_by_genre[this->selected_genre].end(),
+                           this->book_to_borrow) ==
+         this->books_by_genre[this->selected_genre].end();
+}
+
+void Library::borrow_book() {
+  this->borrowed_books[this->checked_in_person_card].push_back(this->book_to_borrow);
+  this->show_borrowed_books();
 }

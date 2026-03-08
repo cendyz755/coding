@@ -18,13 +18,13 @@ public:
 protected:
   unordered_map<string, vector<string>> books_by_genre;
   void show_books();
-
+  void show_borrowed_books();
   unordered_map<string, vector<string>> borrowed_books;
+  map<string, vector<string>> books;
 
 private:
   const string LOADING_BOOKS_MSG{"Loading books...\n"};
   const string BOOKS_LOADED_MSG{"Books loaded to library.\n"};
-  map<string, vector<string>> books;
 
   const string BOOKSHELF_FILE_TYPE{".csv"};
   unsigned short bookshelf_num{1};

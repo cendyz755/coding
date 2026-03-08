@@ -50,34 +50,30 @@ bool Bookshelves::is_bookshelf_exist() {
 void Bookshelves::reading_bookshelf() {
   std::ifstream bookshelf{this->current_bookshelf};
   string shelf;
-  while (getline(bookshelf, shelf)) {
+  while (getline(bookshelf, shelf))
     this->checking_book(shelf);
-  }
 }
 
-void Bookshelves::checking_book(const string &shelf) {
-  std::stringstream ss(shelf);
+void Bookshelves::checking_book(const string &book) {
+  std::stringstream ss(book);
   string cell;
   vector<string> book_info;
 
-  while (getline(ss, cell, ',')) {
+  while (getline(ss, cell, ','))
     book_info.push_back(cell);
-  }
 
   this->add_book_to_correct_genre(book_info);
 
-  for (string &info : book_info) {
+  for (string &info : book_info)
     this->books[book_info[0]].push_back(info);
-  }
 }
 
 void Bookshelves::show_books() {
   for (auto &[shelf, books1] : this->books) {
     cout << "Shelf number: " << shelf << '\n';
 
-    for (string &book : books1) {
+    for (string &book : books1)
       cout << book << " ";
-    }
 
     cout << '\n';
   }
@@ -89,4 +85,15 @@ void Bookshelves::add_book_to_correct_genre(const vector<string> &book) {
   constexpr short int GENRE{2};
   if (constexpr short int amount{1}; book[amount] != NO_BOOK)
     this->books_by_genre[book[GENRE]].push_back(book[NAME]);
+}
+
+void Bookshelves::show_borrowed_books() {
+  for (auto &[person_card_number, books1] : this->borrowed_books) {
+    cout << "Person card number: " << person_card_number << '\n';
+    cout << "His books:\n";
+
+    for (string &book : books1) {
+      cout << book << " | ";
+    }
+  }
 }
