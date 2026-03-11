@@ -2,7 +2,7 @@
 // Created by cendyz775 on 2026/03/03.
 //
 
-#include "Registered_people.h"
+#include "../include/library/Registered_people.h"
 
 #include <filesystem>
 #include <fstream>
