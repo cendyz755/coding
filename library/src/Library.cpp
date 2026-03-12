@@ -96,23 +96,40 @@ void Library::show_employee_info() {
 }
 
 void Library::add_book() {
-  print("{}", this->NEW_BOOK_TITLE_MSG);
-  getline(cin, this->new_book_title);
 
-  while (!this->validate_genre_of_book_being_added())
-    println("{}{}{}", Color::RED, this->WRONG_GENRE_MSG, Color::RESET);
+  if (this->validate_title_of_book_being_added()) {
 
-  while (!this->validate_amount_of_book_being_added())
-    println("{}{}{}", Color::RED, this->WRONG_AMOUNT_MSG, Color::RESET);
+    while (!this->validate_genre_of_book_being_added())
+      println("{}{}{}", Color::RED, this->WRONG_GENRE_MSG, Color::RESET);
 
-  const Books_entry new_book{this->new_book_title, this->new_book_genre,
-                             this->new_book_amount};
+    while (!this->validate_amount_of_book_being_added())
+      println("{}{}{}", Color::RED, this->WRONG_AMOUNT_MSG, Color::RESET);
 
-  this->books[this->new_book_title].push_back(new_book);
+    const Books_entry new_book{this->new_book_title, this->new_book_genre,
+                               this->new_book_amount};
+
+    this->books[this->new_book_title].push_back(new_book);
+  }
 
   this->update_books_file();
 
   println("{}{}{}", Color::LIGHT_GREEN, this->BOOK_ADDED_MSG, Color::RESET);
+}
+
+bool Library::validate_title_of_book_being_added() {
+  print("{}", this->NEW_BOOK_TITLE_MSG);
+  getline(cin, this->new_book_title);
+
+  if (this->books.contains(this->new_book_title)) {
+    println("{}{}{}", Color::YELLOW, this->TITLE_ALREADY_EXISTS_MSG,
+            Color::RESET);
+    while (!this->validate_amount_of_book_being_added())
+      ;
+    this->books[this->new_book_title][0].amount += this->new_book_amount;
+    return false;
+  }
+
+  return true;
 }
 
 bool Library::validate_genre_of_book_being_added() {
@@ -135,4 +152,25 @@ bool Library::validate_amount_of_book_being_added() {
   this->new_book_amount = stoi(num);
 
   return regex_match(this->new_book_genre, this->NEW_BOOK_GENRE_REGEX);
+}
+
+void Library::delete_book() {
+  while (!validate_title_to_delete())
+    println("{}{}{}", Color::RED, this->WRONG_TITLE_MSG, Color::RESET);
+
+  if (this->book_to_delete == "back")
+    return;
+
+  this->books.erase(this->book_to_delete);
+
+  this->update_books_file();
+
+  println("{}{}{}", Color::LIGHT_GREEN, this->BOOK_DELETED_MSG, Color::RESET);
+}
+
+bool Library::validate_title_to_delete() {
+  print("{}", this->BOOK_TO_DELETE_MSG);
+  getline(cin, this->book_to_delete);
+  return (this->book_to_delete == "back" ||
+          this->books.contains(this->book_to_delete));
 }

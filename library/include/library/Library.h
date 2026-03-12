@@ -28,6 +28,8 @@ public:
 
   void add_book();
 
+  void delete_book();
+
 private:
   static void show_menu_msg(vector<string> &MENU);
   vector<string> WELCOME_MSG{
@@ -55,6 +57,7 @@ private:
   [[nodiscard]] bool validate_employee();
   [[nodiscard]] bool validate_employee_input();
 
+  const string TITLE_ALREADY_EXISTS_MSG{"This title already exists"};
   const string BOOK_ADDED_MSG{"Book added to the library!"};
   const string WRONG_GENRE_MSG{"Wrong genre."};
   const string WRONG_AMOUNT_MSG{"Wrong amount."};
@@ -67,8 +70,15 @@ private:
   int new_book_amount{};
   regex NEW_BOOK_AMOUNT_REGEX{"^([1-9]|10)$"};
   regex NEW_BOOK_GENRE_REGEX{"fantasy|romance|comedy|thriller"};
+  [[nodiscard]] bool validate_title_of_book_being_added();
   [[nodiscard]] bool validate_amount_of_book_being_added();
   [[nodiscard]] bool validate_genre_of_book_being_added();
+
+  const string BOOK_DELETED_MSG{"Book deleted!"};
+  const string WRONG_TITLE_MSG{"This title don't exist."};
+  const string BOOK_TO_DELETE_MSG{"Book to delete: "};
+  string book_to_delete;
+  [[nodiscard]] bool validate_title_to_delete();
 };
 
 #endif // LIBRARY_H

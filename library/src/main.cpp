@@ -20,7 +20,9 @@ int main() {
           if (library.employee_option_input == "4")
             library.add_book();
 
-          if (library.employee_option_input == "6")
+          if (library.employee_option_input == "5")
+            library.delete_book();
+          else if (library.employee_option_input == "6")
             break;
         }
       }
