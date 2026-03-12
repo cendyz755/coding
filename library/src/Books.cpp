@@ -3,8 +3,10 @@
 #include <filesystem>
 #include <fstream>
 #include <print>
+#include <ranges>
 #include <sstream>
 using std::print;
+using std::println;
 namespace fs = std::filesystem;
 
 namespace Color {
@@ -49,14 +51,15 @@ void Books::add_book_to_variables(const string &line) {
 
 void Books::update_books_file() {
   std::ofstream temp_db_file{this->TEMP_DB_PATH};
-  std::ifstream books_db_file{this->BOOKS_PATH};
   string line;
 
-  while (getline(books_db_file, line))
-    temp_db_file << line << '\n';
+  for (auto &book : books | std::views::values) {
+    temp_db_file << book[0].title << ';' << book[0].genre << ';'
+                 << book[0].amount << '\n';
+  }
 
-  books_db_file.close();
   temp_db_file.close();
+  println("SŁÓŃ");
 
   fs::remove(this->BOOKS_PATH);
   fs::rename(this->TEMP_DB_PATH, this->BOOKS_PATH);
@@ -65,8 +68,8 @@ void Books::update_books_file() {
 void Books::read_by_genre() {
   for (auto &[title, books] : this->books) {
     println("Title: {}", title);
-      for (auto & book : books)
-        println("{}", book.genre);
+    for (auto &book : books)
+      println("{}", book.genre);
   }
 }
 

@@ -25,12 +25,10 @@ protected:
   unordered_map<string, vector<Employee_entry>> employees_info{};
   unordered_map<string, vector<string>> borrowed_books_of_employees{};
 
-  void add_book_to_variable();
-  void add_book_to_file();
-  // void remove_book_from_library();
 public:
   Employees();
   ~Employees();
+
 
 private:
   const string EMPLOYEES_DB_FILE_PATH{"data/employees.csv"};

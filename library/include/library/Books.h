@@ -24,7 +24,7 @@ public:
 
 protected:
   unordered_map<string, vector<Books_entry>> books;
-  // map<string, vector<Books_entry>> books_by_title;
+  void update_books_file();
 
 private:
   const string LOADING_BOOKS_MSG{"Loading books...\n"};
@@ -33,7 +33,6 @@ private:
   const string BOOKS_PATH{"data/books.csv"};
   void read_books_file();
   void add_book_to_variables(const string &line);
-  void update_books_file();
 
   void read_by_title();
   void read_by_genre();

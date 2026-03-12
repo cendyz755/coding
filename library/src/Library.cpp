@@ -31,7 +31,7 @@ void Library::show_menu_msg(vector<string> &MENU) {
 }
 
 void Library::chosing_menu_option() {
-  Library::show_menu_msg(this->WELCOME_MSG);
+  show_menu_msg(this->WELCOME_MSG);
 
   println("{}{}{}", Color::PURPLE, this->BACK_TO_MENU_POSSIBILITY_MSG,
           Color::RESET);
@@ -69,7 +69,7 @@ bool Library::validate_employee() {
 }
 
 void Library::chosing_employee_option() {
-  Library::show_menu_msg(this->EMPLOYEE_MENU);
+  show_menu_msg(this->EMPLOYEE_MENU);
 
   while (!this->validate_employee_input())
     println("{}{}{}", Color::RED, this->WRONG_MENU_OPT_MSG, Color::RESET);
@@ -93,4 +93,46 @@ void Library::show_employee_info() {
           this->employees_info[this->employee_id_input][0].surname);
   println("{}{}{}{}{}", Color::ORANGE, "\tIdentifiction number", Color::RESET,
           ": ", this->employees_info[this->employee_id_input][0].person_id);
+}
+
+void Library::add_book() {
+  print("{}", this->NEW_BOOK_TITLE_MSG);
+  getline(cin, this->new_book_title);
+
+  while (!this->validate_genre_of_book_being_added())
+    println("{}{}{}", Color::RED, this->WRONG_GENRE_MSG, Color::RESET);
+
+  while (!this->validate_amount_of_book_being_added())
+    println("{}{}{}", Color::RED, this->WRONG_AMOUNT_MSG, Color::RESET);
+
+  const Books_entry new_book{this->new_book_title, this->new_book_genre,
+                             this->new_book_amount};
+
+  this->books[this->new_book_title].push_back(new_book);
+
+  this->update_books_file();
+
+  println("{}{}{}", Color::LIGHT_GREEN, this->BOOK_ADDED_MSG, Color::RESET);
+}
+
+bool Library::validate_genre_of_book_being_added() {
+  print("{}", this->NEW_BOOK_GENRE_MSG);
+  getline(cin, this->new_book_genre);
+  return regex_match(this->new_book_genre, this->NEW_BOOK_GENRE_REGEX);
+}
+
+bool Library::validate_amount_of_book_being_added() {
+  print("{}", this->NEW_BOOK_AMOUNT);
+  string num;
+  getline(cin, num);
+
+  const bool is_ok{std::all_of(num.begin(), num.end(),
+                               [](const char &c) { return isdigit(c); })};
+
+  if (num.size() > 3 || !is_ok)
+    return false;
+
+  this->new_book_amount = stoi(num);
+
+  return regex_match(this->new_book_genre, this->NEW_BOOK_GENRE_REGEX);
 }
