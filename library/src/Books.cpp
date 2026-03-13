@@ -5,9 +5,14 @@
 #include <print>
 #include <ranges>
 #include <sstream>
+using std::ifstream;
+using std::ofstream;
 using std::print;
 using std::println;
+using std::stringstream;
+namespace vw = std::views;
 namespace fs = std::filesystem;
+namespace vw = std::views;
 
 namespace Color {
 constexpr auto RED{"\033[31m"};
@@ -18,121 +23,103 @@ constexpr auto RESET{"\033[0m"};
 } // namespace Color
 
 Books::Books() {
-  print("{}{}{}", Color::YELLOW, this->LOADING_BOOKS_MSG, Color::RESET);
-  this->read_books_file();
-  // this->read_by_genre();
-  // this->update_books_file();
-  print("{}{}{}", Color::LIGHT_GREEN, this->BOOKS_LOADED_MSG, Color::RESET);
+  print("{}{}{}", Color::YELLOW, LOADING_BOOKS_MSG, Color::RESET);
+  read_books_file();
+  read_borrowed_books_file();
+  print("{}{}{}", Color::LIGHT_GREEN, BOOKS_LOADED_MSG, Color::RESET);
 }
 
-Books::~Books() = default;
-
 void Books::read_books_file() {
-  std::ifstream books_file{this->BOOKS_PATH};
+  if (!fs::exists(BOOKS_PATH)) {
+    ofstream new_books_file{BOOKS_PATH};
+    new_books_file.close();
+    return;
+  }
+
+  ifstream books_file{BOOKS_PATH};
   string line;
 
   while (getline(books_file, line))
-    this->add_book_to_variables(line);
+    add_book_to_variables(line);
 
   books_file.close();
 }
 
 void Books::add_book_to_variables(const string &line) {
-  std::stringstream ss(line);
+  stringstream ss(line);
   string title, genre, amount;
 
   getline(ss, title, ';');
   getline(ss, genre, ';');
   getline(ss, amount, ';');
 
+  string lowered_title{title};
+  std::transform(lowered_title.begin(), lowered_title.end(),
+                 lowered_title.begin(),
+                 [](const char c) { return tolower(c); });
+
   const Books_entry entry{title, genre, std::stoi(amount)};
-  this->books[title].push_back(entry);
+  books[lowered_title].push_back(entry);
 }
 
 void Books::update_books_file() {
-  std::ofstream temp_db_file{this->TEMP_DB_PATH};
+  ofstream temp_db_file{TEMP_DB_PATH};
   string line;
 
-  for (auto &book : books | std::views::values) {
+  for (auto &book : books | vw::values) {
     temp_db_file << book[0].title << ';' << book[0].genre << ';'
                  << book[0].amount << '\n';
   }
 
   temp_db_file.close();
-  println("SŁÓŃ");
 
-  fs::remove(this->BOOKS_PATH);
-  fs::rename(this->TEMP_DB_PATH, this->BOOKS_PATH);
+  fs::remove(BOOKS_PATH);
+  fs::rename(TEMP_DB_PATH, BOOKS_PATH);
 }
 
-void Books::read_by_genre() {
-  for (auto &[title, books] : this->books) {
-    println("Title: {}", title);
-    for (auto &book : books)
-      println("{}", book.genre);
+void Books::read_books_title() {
+  println("{}{}{}", Color::LIGHT_CYAN, AVAILABLE_TITLES_MSG, Color::RESET);
+  for (auto &book_info : books | vw::values)
+    if (book_info[0].amount > 0)
+      println("{}{}", '\t', book_info[0].title);
+}
+
+void Books::read_borrowed_books_file() {
+  if (!fs::exists(BORROWED_BOOKS_PATH)) {
+    ofstream borrowed_books_file{BORROWED_BOOKS_PATH};
+    borrowed_books_file.close();
+    return;
   }
+
+  ifstream borrowed_db{BORROWED_BOOKS_PATH};
+  string line;
+
+  while (getline(borrowed_db, line))
+    add_borrowed_book_to_file(line);
 }
 
-// string Books::update_bookshelf_path() {
-//   return this->current_bookshelf = this->BOOKS_PATH +
-//                                    std::to_string(this->bookshelf_num) +
-//                                    this->BOOKSHELF_FILE_TYPE;
-// }
+void Books::add_borrowed_book_to_file(const string &line) {
+  stringstream ss(line);
 
-// bool Books::is_bookshelf_exist() {
-//   if (!fs::exists(this->update_bookshelf_path()))
-//     return false;
-//
-//   return true;
-// }
+  string id, title, amount;
 
-// void Books::reading_bookshelf() {
-//   std::ifstream bookshelf{this->current_bookshelf};
-//   string shelf;
-//   while (getline(bookshelf, shelf))
-//     this->checking_book(shelf);
-// }
+  getline(ss, id, ';');
+  getline(ss, title, ';');
 
-// void Books::checking_book(const string &book) {
-//   std::stringstream ss(book);
-//   string cell;
-//   vector<string> book_info;
-//
-//   while (getline(ss, cell, ','))
-//     book_info.push_back(cell);
-//
-//   this->add_book_to_correct_genre(book_info);
-//
-//   for (string &info : book_info)
-//     this->books[book_info[0]].push_back(info);
-// }
-//
-// void Books::show_books() {
-//   for (auto &[shelf, books1] : this->books) {
-//     cout << "Shelf number: " << shelf << '\n';
-//
-//     for (string &book : books1)
-//       cout << book << " ";
-//
-//     cout << '\n';
-//   }
-// }
+  const Borrowed_entry borrowed_book{id, title};
 
-// void Books::add_book_to_correct_genre(const vector<string> &book) {
-//   const string NO_BOOK{"0"};
-//   constexpr short int NAME{0};
-//   constexpr short int GENRE{2};
-//   if (constexpr short int amount{1}; book[amount] != NO_BOOK)
-//     this->books_by_genre[book[GENRE]].push_back(book[NAME]);
-// }
-//
-// void Books::show_borrowed_books() {
-//   for (auto &[person_card_number, books1] : this->borrowed_books) {
-//     cout << "Person card number: " << person_card_number << '\n';
-//     cout << "His books:\n";
-//
-//     for (string &book : books1) {
-//       cout << book << " | ";
-//     }
-//   }
-// }
+  borrowed_books[id].push_back(borrowed_book);
+}
+
+void Books::update_borrowed_books_file() {
+  ofstream temp_db{TEMP_DB_PATH};
+
+  for (const auto &info : borrowed_books | vw::values)
+    for (const auto &[card_id, title] : info)
+      temp_db << card_id << ';' << title << '\n';
+
+  temp_db.close();
+
+  fs::remove(BORROWED_BOOKS_PATH);
+  fs::rename(TEMP_DB_PATH, BORROWED_BOOKS_PATH);
+}

@@ -21,20 +21,16 @@ struct Employee_entry {
 };
 
 class Employees {
-protected:
-  unordered_map<string, vector<Employee_entry>> employees_info{};
-  unordered_map<string, vector<string>> borrowed_books_of_employees{};
-
 public:
   Employees();
-  ~Employees();
+  unordered_map<string, vector<Employee_entry>> employees_info{};
+  unordered_map<string, vector<string>> borrowed_books_of_employees{};
 
 
 private:
   const string EMPLOYEES_DB_FILE_PATH{"data/employees.csv"};
   void read_employees_db();
   void insert_employee_to_variable(const string &line);
-  void read_employees_var();
 };
 
 #endif // LIBRARY_EMPLOYEE_H

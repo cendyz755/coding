@@ -9,17 +9,21 @@
 using std::cout;
 
 Employees::Employees() {
-  this->read_employees_db();
-  // this->read_employees_var();
+  read_employees_db();
 };
 
-Employees::~Employees() = default;
 
 void Employees::read_employees_db() {
-  std::ifstream db_file{this->EMPLOYEES_DB_FILE_PATH};
+  if (!std::filesystem::exists(EMPLOYEES_DB_FILE_PATH)) {
+    std::ofstream employees_file{EMPLOYEES_DB_FILE_PATH};
+    employees_file.close();
+    return;
+  }
+
+  std::ifstream db_file{EMPLOYEES_DB_FILE_PATH};
   string line;
   while (getline(db_file, line))
-    this->insert_employee_to_variable(line);
+    insert_employee_to_variable(line);
 
   db_file.close();
 }
@@ -34,14 +38,5 @@ void Employees::insert_employee_to_variable(const string &line) {
   getline(ss, person_id, ';');
 
   const Employee_entry entry{id, name, surname, person_id};
-  this->employees_info[id].push_back(entry);
-}
-
-void Employees::read_employees_var() {
-  for (auto &[employee_login, employee_info] : this->employees_info) {
-    cout << "Employee id and his info: " << employee_login << '\n';
-    for (auto &info : employee_info)
-      cout << info.name << " ";
-    cout << '\n';
-  }
+  employees_info[id].push_back(entry);
 }

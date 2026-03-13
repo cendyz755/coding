@@ -16,6 +16,9 @@ int main() {
 
           if (library.employee_option_input == "1")
             library.show_employee_info();
+          else if (library.employee_option_input == "2")
+            while (library.borrow_book()) {
+            };
 
           if (library.employee_option_input == "4")
             library.add_book();

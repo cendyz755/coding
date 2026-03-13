@@ -17,14 +17,19 @@ struct Books_entry {
   int amount{};
 };
 
-class Books : protected Employees{
+struct Borrowed_entry {
+  string card_id;
+  string title;
+};
+
+class Books {
 public:
   Books();
-  virtual ~Books();
-
-protected:
   unordered_map<string, vector<Books_entry>> books;
+  unordered_map<string, vector<Borrowed_entry>> borrowed_books;
   void update_books_file();
+  void read_books_title();
+  void update_borrowed_books_file();
 
 private:
   const string LOADING_BOOKS_MSG{"Loading books...\n"};
@@ -34,8 +39,10 @@ private:
   void read_books_file();
   void add_book_to_variables(const string &line);
 
-  void read_by_title();
-  void read_by_genre();
+  const string BORROWED_BOOKS_PATH{"data/borrowed_books.csv"};
+  const string AVAILABLE_TITLES_MSG{"Available titles:"};
+  void read_borrowed_books_file();
+  void add_borrowed_book_to_file(const string & line);
 };
 
 #endif // BOOKSHELFS_H
