@@ -10,20 +10,19 @@ int main() {
 
     if (library.user_option == "6") {
       library.employee_checkin();
-      if (library.employee_id_input != "back") {
+      if (library.user_id != "back") {
         while (true) {
           library.chosing_employee_option();
 
           if (library.employee_option_input == "1")
             library.show_employee_info();
           else if (library.employee_option_input == "2")
-            while (library.borrow_book()) {
-            };
-
-          if (library.employee_option_input == "4")
+            library.borrow_book();
+          else if (library.employee_option_input == "3")
+            library.return_book();
+          else if (library.employee_option_input == "4")
             library.add_book();
-
-          if (library.employee_option_input == "5")
+          else if (library.employee_option_input == "5")
             library.delete_book();
           else if (library.employee_option_input == "6")
             break;

@@ -101,22 +101,29 @@ void Books::read_borrowed_books_file() {
 void Books::add_borrowed_book_to_file(const string &line) {
   stringstream ss(line);
 
-  string id, title, amount;
+  string id;
+  string cell;
 
-  getline(ss, id, ';');
-  getline(ss, title, ';');
-
-  const Borrowed_entry borrowed_book{id, title};
-
-  borrowed_books[id].push_back(borrowed_book);
+  while (getline(ss, cell, ';'))
+    if (id.empty()) {
+      id = cell;
+      borrowed_books[id].push_back(id);
+    } else
+      borrowed_books[id].push_back(cell);
 }
 
 void Books::update_borrowed_books_file() {
   ofstream temp_db{TEMP_DB_PATH};
 
-  for (const auto &info : borrowed_books | vw::values)
-    for (const auto &[card_id, title] : info)
-      temp_db << card_id << ';' << title << '\n';
+  for (auto &[person_id, brwd_books] : borrowed_books) {
+    temp_db << person_id << ';';
+
+    for (size_t i{1}; i < brwd_books.size(); ++i)
+      if (i == brwd_books.size() - 1)
+        temp_db << brwd_books[i] << '\n';
+      else
+        temp_db << brwd_books[i] << ';';
+  }
 
   temp_db.close();
 

@@ -7,6 +7,8 @@ using std::print;
 using std::println;
 using std::regex_match;
 
+namespace vw = std::views;
+
 namespace Color {
 constexpr auto RED{"\033[31m"};
 constexpr auto YELLOW{"\033[33m"};
@@ -49,12 +51,12 @@ void Library::employee_checkin() {
 
 bool Library::validate_employee() {
   print("{}", EMPLOYEE_ID_LOGIN_MSG);
-  getline(cin, employee_id_input);
+  getline(cin, user_id);
 
-  if (employee_id_input == "back")
+  if (user_id == "back")
     return true;
 
-  if (!employees_manager->employees_info.contains(employee_id_input)) {
+  if (!employees_manager->employees_info.contains(user_id)) {
     println("{}{}{}", Color::RED, WRONG_EMPLOYEE_ID_INPUT_MSG, Color::RESET);
     return false;
   }
@@ -81,14 +83,13 @@ bool Library::validate_employee_input() {
 void Library::show_employee_info() const {
   println("Your info:");
   println("{}{}{}{}{}", Color::ORANGE, "\tName", Color::RESET, ": ",
-          employees_manager->employees_info[employee_id_input][0].name);
+          employees_manager->employees_info[user_id][0].name);
   println("{}{}{}{}{}", Color::ORANGE, "\tSurname", Color::RESET, ": ",
-          employees_manager->employees_info[employee_id_input][0].surname);
+          employees_manager->employees_info[user_id][0].surname);
   println("{}{}{}{}{}", Color::ORANGE, "\tIdentifiction number", Color::RESET,
-          ": ",
-          employees_manager->employees_info[employee_id_input][0].person_id);
-  print("{}{}{}{}{}", '\t', Color::ORANGE, BORROWED_BOOKS_MSG, Color::RESET, ":"
-                                                                           " ");
+          ": ", employees_manager->employees_info[user_id][0].person_id);
+  print("{}{}{}{}{}", '\t', Color::ORANGE, BORROWED_BOOKS_MSG, Color::RESET,
+        ": ");
   show_borrowed_books();
 }
 
@@ -197,9 +198,7 @@ bool Library::validate_borrow_title() {
   print("{}", BOOK_TO_BORROW_MSG);
   getline(cin, book_to_borrow);
 
-  std::transform(book_to_borrow.begin(), book_to_borrow.end(),
-                 book_to_borrow.begin(),
-                 [](const char &c) { return tolower(c); });
+  lower_string(book_to_borrow);
 
   if (book_to_borrow == "back" ||
       book_manager->books.contains(book_to_borrow) &&
@@ -211,29 +210,108 @@ bool Library::validate_borrow_title() {
 }
 
 void Library::add_borrowed_book_to_var() const {
-  const Borrowed_entry borwd{employee_id_input, book_to_borrow};
+  const string new_title{book_manager->books[book_to_borrow][0].title};
 
-  book_manager->borrowed_books[employee_id_input].push_back(borwd);
+  if (!book_manager->borrowed_books.contains(user_id))
+    book_manager->borrowed_books[user_id].push_back(user_id);
 
+  book_manager->borrowed_books[user_id].push_back(new_title);
   book_manager->books[book_to_borrow][0].amount -= 1;
 }
 
 bool Library::book_already_borrowed() const {
-  for (const auto &info : book_manager->borrowed_books | std::views::values)
-    for (const auto &[card_id, title] : info)
-      if (title == book_to_borrow)
+  for (const vector<string> &info : book_manager->borrowed_books | vw::values)
+    for (const string &title : info) {
+      string lower_title = title;
+      lower_string(lower_title);
+      if (lower_title == book_to_borrow)
         return true;
+    }
 
   return false;
 }
 
 void Library::show_borrowed_books() const {
-  const vector<Borrowed_entry> &actual_person{
-      book_manager->borrowed_books[employee_id_input]};
+  if (!book_manager->borrowed_books.contains(user_id)) {
+    println("None");
+    return;
+  }
 
-  for (size_t i{}; i < actual_person.size(); ++i)
-    if (i == actual_person.size() - 1)
-      print("{}{}", actual_person[i].title, '\n');
+  const vector<string> &actual_person_books{
+      book_manager->borrowed_books[user_id]};
+  for (size_t i{1}; i < actual_person_books.size(); ++i)
+    if (i == actual_person_books.size() - 1)
+      print("{}{}", actual_person_books[i], '\n');
     else
-      print("{}{}", actual_person[i].title, ", ");
+      print("{}{}", actual_person_books[i], ", ");
+}
+
+void Library::return_book() {
+  show_books_to_return();
+
+  while (!validate_return_title())
+    println("{}{}{}", Color::RED, WRONG_RETURN_BOOK_MSG, Color::RESET);
+
+  if (book_to_return == "back")
+    return;
+
+  book_manager->books[book_to_return][0].amount += 1;
+
+  book_manager->update_books_file();
+  book_manager->update_borrowed_books_file();
+  println("{}{}{}", Color::LIGHT_GREEN, BOOK_RETURNED_MSG, Color::RESET);
+}
+
+bool Library::validate_return_title() {
+  print("{}", BOOK_TO_RETURN_MSG);
+  getline(cin, book_to_return);
+
+  lower_string(book_to_return);
+
+  if (book_to_return == "back")
+    return true;
+
+  if (!user_borrowed_this_title())
+    return false;
+
+  const string title_to_remove{book_manager->books[book_to_return][0].title};
+  cout << "to do usunięcia: " << title_to_remove << '\n';
+  std::erase(book_manager->borrowed_books[user_id], title_to_remove);
+
+  return true;
+}
+
+bool Library::user_borrowed_this_title() const {
+  for (string lower_title;
+       const string &borrowed_title : book_manager->borrowed_books[user_id]) {
+    lower_title = borrowed_title;
+    lower_string(lower_title);
+    if (lower_title == book_to_return)
+      return true;
+  }
+
+  return false;
+}
+
+void Library::show_books_to_return() const {
+  if (!book_manager->borrowed_books.contains(user_id)) {
+    println("{}{}{}", Color::YELLOW, NOT_BORROWED_ANY_BOOK_MSG, Color::RESET);
+    return;
+  }
+
+  print("{}{}{}", Color::ORANGE, BOOKS_RETURN_MSG, Color::RESET);
+
+  vector<string> &brwd_books{book_manager->borrowed_books[user_id]};
+
+  for (size_t i{1}; i < brwd_books.size(); ++i)
+    if (i == brwd_books.size() - 1)
+      println("{}", brwd_books[i]);
+    else
+      print("{}{}", brwd_books[i], ", ");
+}
+
+void Library::lower_string(string &str_to_change) {
+  std::transform(str_to_change.begin(), str_to_change.end(),
+                 str_to_change.begin(),
+                 [](const char &c) { return tolower(c); });
 }

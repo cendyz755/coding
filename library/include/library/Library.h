@@ -21,7 +21,7 @@ public:
   string user_option;
   void chosing_menu_option();
 
-  string employee_id_input;
+  string user_id;
   string employee_option_input;
   void employee_checkin();
   void chosing_employee_option();
@@ -34,9 +34,13 @@ public:
 
   bool borrow_book();
 
+  void return_book();
+
 private:
   std::unique_ptr<Books> book_manager;
   std::unique_ptr<Employees> employees_manager;
+
+  static void lower_string(string & str_to_change);
 
   static void show_menu_msg(vector<string> &MENU);
   vector<string> WELCOME_MSG{
@@ -93,12 +97,23 @@ private:
                                 "already borrowed."};
   const string BOOK_TO_BORROW_MSG{"What title do you want to borrow?: "};
   string book_to_borrow;
-  bool validate_borrow_title();
+  [[nodiscard]] bool validate_borrow_title();
   void add_borrowed_book_to_var() const;
   [[nodiscard]] bool book_already_borrowed() const;
 
-  const string BORROWED_BOOKS_MSG{"Your borrowed books"};
+  const string BORROWED_BOOKS_MSG{"Your borrowed books:"};
   void show_borrowed_books() const;
+
+  const string NOT_BORROWED_ANY_BOOK_MSG{"You didn't borrowed any book!"};
+  const string BOOK_RETURNED_MSG{"Book returned to library!"};
+  const string BOOK_TO_RETURN_MSG{"Book to return: "};
+  const string WRONG_RETURN_BOOK_MSG{"You don't borrowed this book or title is incorrect."};
+  string book_to_return;
+  [[nodiscard]] bool validate_return_title();
+  [[nodiscard]] bool user_borrowed_this_title() const;
+
+  const string BOOKS_RETURN_MSG{"Books to return: "};
+  void show_books_to_return() const;
 };
 
 #endif // LIBRARY_H

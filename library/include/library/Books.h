@@ -17,16 +17,11 @@ struct Books_entry {
   int amount{};
 };
 
-struct Borrowed_entry {
-  string card_id;
-  string title;
-};
-
 class Books {
 public:
   Books();
   unordered_map<string, vector<Books_entry>> books;
-  unordered_map<string, vector<Borrowed_entry>> borrowed_books;
+  unordered_map<string, vector<string>> borrowed_books;
   void update_books_file();
   void read_books_title();
   void update_borrowed_books_file();
